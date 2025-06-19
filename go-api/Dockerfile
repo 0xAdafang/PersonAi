@@ -15,3 +15,5 @@ RUN go build -o story-chan-api .
 EXPOSE 8080
 
 CMD ["./story-chan-api"]
+
+COPY ../rust-core/target/release/rust-core /app/rust-core

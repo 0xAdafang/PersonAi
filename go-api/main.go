@@ -1,9 +1,12 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
+	"io"
 	"log"
 	"net/http"
+	"os/exec"
 )
 
 type AskRequest struct {
@@ -16,6 +19,33 @@ type AskResponse struct {
 	Answer string `json:"answer"`
 }
 
+func buildPrompt(input string) (string, error) {
+	cmd := exec.Command("/app/rust-core")
+
+	cmd.Stdin = bytes.NewBufferString(input)
+	output, err := cmd.Output()
+	if err != nil {
+		return "", err
+	}
+	return string(output), nil
+}
+
+func callPythonLLM(prompt string) (string, error) {
+	payload := map[string]string{"prompt": prompt}
+	jsonData, _ := json.Marshal(payload)
+
+	resp, err := http.Post("http://python-llm:11434/generate", "application/json", bytes.NewBuffer(jsonData))
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	var result map[string]string
+	body, _ := io.ReadAll(resp.Body)
+	json.Unmarshal(body, &result)
+
+	return result["response"], nil
+}
 
 func askHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
@@ -29,10 +59,18 @@ func askHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// 🚧 Appels vers Rust et Python à venir ici (mock pour l’instant)
-	answer := "Réponse factice pour : " + req.Question
+	prompt, err := buildPrompt(req.Question)
+	if err != nil {
+		http.Error(w, "Erreur Rust : "+err.Error(), http.StatusInternalServerError)
+		return
+	}
 
-	w.Header().Set("Content-Type", "application/json")
+	answer, err := callPythonLLM(prompt)
+	if err != nil {
+		http.Error(w, "Erreur Python : "+err.Error(), http.StatusInternalServerError) 
+		return
+	}
+
 	json.NewEncoder(w).Encode(AskResponse{Answer: answer})
 }
 	
