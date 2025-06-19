@@ -6,25 +6,39 @@ import (
 	"net/http"
 )
 
-type AskResquest struct {
+type AskRequest struct {
 	Question string `json:"question"`
+	CharacterID string `json:"character_id"`
+	ScenarioID string`json:"scenario_id"`
 }
 
+type AskResponse struct {
+	Answer string `json:"answer"`
+}
+
+
 func askHandler(w http.ResponseWriter, r *http.Request) {
-	var req AskResquest
-	err := json.NewDecoder(r.Body).Decode(&req)
-	if err != nil {
-		http.Error(w, "Invalid request", http.StatusBadRequest)
+	if r.Method != http.MethodPost {
+		http.Error(w, "Méthode non autorisée", http.StatusMethodNotAllowed)
 		return
 	}
 
-	response := "Réponse factice (à remplacer par le call Rust -> Python)"
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]string{"answer" : response})
-}
+	var req AskRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Requête invalide", http.StatusBadRequest)
+		return
+	}
 
+	// 🚧 Appels vers Rust et Python à venir ici (mock pour l’instant)
+	answer := "Réponse factice pour : " + req.Question
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(AskResponse{Answer: answer})
+}
+	
 func main() {
 	http.HandleFunc("/ask", askHandler)
-	log.Println("✅ Go API en écoute sur :8080")
+	log.Println("🚀 Go API en écoute sur :8080")
 	log.Fatal(http.ListenAndServe(":8000", nil))
 }
+

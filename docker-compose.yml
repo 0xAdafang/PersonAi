@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   go-api:
     build: ./go-api
@@ -15,4 +13,4 @@ services:
   python-llm:
     build: ./python-llm
     ports:
-      - "11434:11434"  # Port par défaut d’Ollama
+      - "11434:11434"  # Port d’Ollama
