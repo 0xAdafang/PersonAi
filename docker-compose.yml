@@ -1,16 +1,18 @@
+version: "3.8"
+
 services:
   go-api:
-    build: ./go-api
+    build:
+      context: .                
+      dockerfile: go-api/Dockerfile
     ports:
-      - "8080:8080"
+      - "8080:8080"       
     depends_on:
-      - rust-core
       - python-llm
-
-  rust-core:
-    build: ./rust-core
 
   python-llm:
     build: ./python-llm
     ports:
-      - "11434:11434"  # Port d’Ollama
+      - "11434:11434"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"   

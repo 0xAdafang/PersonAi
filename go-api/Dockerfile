@@ -1,19 +1,24 @@
-# syntax=docker/dockerfile:1
+FROM rust:1.77 AS rust-builder
+WORKDIR /build
+COPY rust-core ./rust-core
+WORKDIR /build/rust-core
+RUN cargo build --release
 
-FROM golang:1.24-alpine
 
+FROM golang:1.24-alpine AS go-builder
 WORKDIR /app
 
-COPY go.mod ./
 
-RUN go mod download
+RUN apk add --no-cache git
 
-COPY . .
+
+COPY go-api/ .
+
+
+COPY --from=rust-builder /build/rust-core/target/release/rust-core /app/rust-core
+
 
 RUN go build -o story-chan-api .
 
 EXPOSE 8080
-
 CMD ["./story-chan-api"]
-
-COPY ../rust-core/target/release/rust-core /app/rust-core

@@ -19,10 +19,31 @@ type AskResponse struct {
 	Answer string `json:"answer"`
 }
 
-func buildPrompt(input string) (string, error) {
-	cmd := exec.Command("/app/rust-core")
+func buildPrompt(input AskRequest) (string, error) {
 
-	cmd.Stdin = bytes.NewBufferString(input)
+	payload := map[string] interface{}{
+		"question" : input.Question,
+		"character": map[string]string{
+			"name":        "Aldor",
+			"role":        "sage",
+			"personality": "mystérieux et bienveillant",
+		},
+
+		"scenario": map[string]string{
+			"title":   "La Tour du Temps",
+			"context": "Le monde est figé depuis mille ans.",
+		},
+		"style": "poetique",
+		"memory": []string{
+			"Aldor t’a déjà parlé des portes temporelles.",
+			"Tu as découvert une clepsydre étrange dans la salle du trône.",
+		}, 
+	}
+
+	jsonData, _ := json.Marshal(payload)
+
+	cmd := exec.Command("./rust-core")
+	cmd.Stdin = bytes.NewBuffer(jsonData)
 	output, err := cmd.Output()
 	if err != nil {
 		return "", err
@@ -59,12 +80,11 @@ func askHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	prompt, err := buildPrompt(req.Question)
+	prompt, err := buildPrompt(req)
 	if err != nil {
 		http.Error(w, "Erreur Rust : "+err.Error(), http.StatusInternalServerError)
 		return
 	}
-
 	answer, err := callPythonLLM(prompt)
 	if err != nil {
 		http.Error(w, "Erreur Python : "+err.Error(), http.StatusInternalServerError) 
@@ -77,6 +97,6 @@ func askHandler(w http.ResponseWriter, r *http.Request) {
 func main() {
 	http.HandleFunc("/ask", askHandler)
 	log.Println("🚀 Go API en écoute sur :8080")
-	log.Fatal(http.ListenAndServe(":8000", nil))
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 
