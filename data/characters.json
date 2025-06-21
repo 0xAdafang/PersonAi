@@ -1,0 +1,26 @@
+[
+  {
+    "id": "1",
+    "name": "Aldor",
+    "role": "sage",
+    "personality": "mystérieux et bienveillant",
+    "tags": {
+      "genre": ["fantasy", "politics"],
+      "rating": ["sfw"],
+      "character": ["male", "dominant"],
+      "source": ["original"]
+    }
+  },
+  {
+    "id": "2",
+    "name": "Kaela",
+    "role": "assassine",
+    "personality": "froide et méthodique",
+    "tags": {
+      "genre": ["action", "horror"],
+      "rating": ["nsfw"],
+      "character": ["female", "submissive"],
+      "source": ["anime"]
+    }
+  }
+]

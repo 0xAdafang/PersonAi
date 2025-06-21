@@ -1,0 +1,22 @@
+[
+  {
+    "id": "1",
+    "title": "La Tour du Temps",
+    "context": "Le monde est figé depuis mille ans.",
+    "tags": {
+      "genre": ["fantasy"],
+      "rating": ["sfw"],
+      "source": ["books"]
+    }
+  },
+  {
+    "id": "2",
+    "title": "Le Pacte du Néant",
+    "context": "Une faille dimensionnelle absorbe les souvenirs des vivants.",
+    "tags": {
+      "genre": ["horror", "slice of life"],
+      "rating": ["nsfl"],
+      "source": ["original"]
+    }
+  }
+]
