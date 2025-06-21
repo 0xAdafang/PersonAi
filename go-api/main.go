@@ -76,7 +76,8 @@ type AskRequest struct {
 	Question 		string 		`json:"question"`
 	CharacterID 	string 		`json:"character_id"`
 	ScenarioID 		string		`json:"scenario_id"`
-	UserID			string		`json:"user_id"`	
+	UserID			string		`json:"user_id"`
+	Style			string		`json:"style"`	
 }
 
 type AskResponse struct {
@@ -120,7 +121,8 @@ func buildPrompt(input AskRequest) (string, error) {
 		"title":   scen.Title,
 		"context": scen.Context,
 	},
-	"style": "poétique", // plus tard modifiable côté UI
+
+	"style": input.Style,
 	"memory": memory,
 }
 
