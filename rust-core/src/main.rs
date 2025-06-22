@@ -4,31 +4,26 @@ use std::io::{self, Read};
 #[derive(Deserialize)]
 struct Character {
     name: String,
-    role: String,
-    personality: String,
-}
-
-#[derive(Deserialize)]
-struct Scenario {
-    title: String,
-    context: String,
+    tagline: String,
+    description: String,
+    greeting: String,
+    definition: String,
 }
 
 #[derive(Deserialize)]
 struct PromptInput {
-    question: String,
     character: Character,
-    scenario: Scenario,
     style: String,
     memory: Vec<String>,
+    user: String,
+    user_persona: String,
 }
 
-
 fn main() {
-    let mut input = String::new();
-    io::stdin().read_to_string(&mut input).unwrap();
+    let mut buffer = String::new();
+    io::stdin().read_to_string(&mut buffer).unwrap();
 
-    let parsed: PromptInput = match serde_json::from_str(&input) {
+    let parsed: PromptInput = match serde_json::from_str(&buffer) {
         Ok(p) => p,
         Err(e) => {
             eprintln!("Erreur de parsing JSON : {}", e);
@@ -36,17 +31,20 @@ fn main() {
         }
     };
 
-    println!(
-         "[Personnage]: {} ({}, {})\n[Scénario]: {} - {}\n[Style]: {}\n[Mémoire]: {}\n[Utilisateur]: {}",
+    let prompt = format!(
+        "[Nom]: {}\n[Tagline]: {}\n[Description]: {}\n[Greeting]: {}\n[Style]: {}\n[Définition]: {}\n[Utilisateur - Profil]: {}\n[Mémoire]: {}\n[Utilisateur]: {}",
         parsed.character.name,
-        parsed.character.role,
-        parsed.character.personality,
-        parsed.scenario.title,
-        parsed.scenario.context,
+        parsed.character.tagline,
+        parsed.character.description,
+        parsed.character.greeting,
         parsed.style,
+        parsed.character.definition,
+        parsed.user_persona,
         parsed.memory.join(" | "),
-        parsed.question
+        parsed.user
     );
+
+    println!("{}", prompt);
 }
 
 

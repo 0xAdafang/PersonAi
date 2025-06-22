@@ -12,19 +12,15 @@ import (
 )
 
 type Character struct {
-	ID 				string 		`json:"id"`
-	Name			string		`json:"name"`
-	Role			string		`json:"role"`
-	Personality		string		`json:"personality"`
-	Tags 			map[string][]string		`json:"tags"`
+	ID          string              `json:"id"`
+	Name        string              `json:"name"`
+	Tagline     string              `json:"tagline"`
+	Description string              `json:"description"`
+	Greeting    string              `json:"greeting"`
+	Definition  string              `json:"definition"` 
+	Tags        map[string][]string `json:"tags"`
 }
 
-type Scenario struct {
-	ID      		string            `json:"id"`
-	Title   		string            `json:"title"`
-	Context 		string            `json:"context"`
-	Tags    		map[string][]string `json:"tags"`
-}
 
 func loadCharacter(id string) (Character, error) {
 
@@ -49,35 +45,12 @@ func loadCharacter(id string) (Character, error) {
 }
 
 
-func loadScenario(id string) (Scenario, error) {
-
-	data, err := os.ReadFile("data/scenarios.json")
-	if err != nil {
-		return Scenario{}, err
-	}
-
-	var scenarios []Scenario
-	if err := json.Unmarshal(data, &scenarios); err != nil {
-		return Scenario{}, err
-	}
-
-	for _, s := range scenarios {
-		if s.ID == id {
-			return s, nil
-		}
-	}
-
-	return Scenario{}, fmt.Errorf("scénario non trouvé")
-
-
-}
-
 type AskRequest struct {
-	Question 		string 		`json:"question"`
-	CharacterID 	string 		`json:"character_id"`
-	ScenarioID 		string		`json:"scenario_id"`
-	UserID			string		`json:"user_id"`
-	Style			string		`json:"style"`	
+	Question    string `json:"question"`
+	CharacterID string `json:"character_id"`
+	UserID      string `json:"user_id"`
+	Style       string `json:"style"`
+	UserPersona string `json:"user_persona"`
 }
 
 type AskResponse struct {
@@ -94,12 +67,8 @@ func buildPrompt(input AskRequest) (string, error) {
 		return "",err
 	}
 
-	scen, err := loadScenario(input.ScenarioID)
-	if err != nil {
-		return "",err
-	}
 
-	key := fmt.Sprintf("%s_%s_%s", input.CharacterID, input.ScenarioID, input.UserID)
+	key := fmt.Sprintf("%s_%s", input.CharacterID, input.UserID)
 	
 	memory := conversationHistory[key]
 
@@ -111,20 +80,20 @@ func buildPrompt(input AskRequest) (string, error) {
 	conversationHistory[key] = memory
 
 	payload := map[string]interface{}{
-	"question": input.Question,
-	"character": map[string]string{
-		"name":        char.Name,
-		"role":        char.Role,
-		"personality": char.Personality,
-	},
-	"scenario": map[string]string{
-		"title":   scen.Title,
-		"context": scen.Context,
-	},
+		"character": map[string]string{
+			"name":        char.Name,
+			"tagline":     char.Tagline,
+			"description": char.Description,
+			"greeting":    char.Greeting,
+			"definition":  char.Definition,
+			
+		},
+		"style":  input.Style,
+		"memory": memory,
+		"user":   input.Question,
+		"user_persona": input.UserPersona,
+	}
 
-	"style": input.Style,
-	"memory": memory,
-}
 
 	jsonData, _ := json.Marshal(payload)
 
@@ -189,7 +158,6 @@ func resetHandler(w http.ResponseWriter, r *http.Request) {
 	var input struct {
 		UserID		string `json:"user_id"`
 		CharacterID string `json:"character_id"`
-		ScenarioID	string `json:"scenario_id"`
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
@@ -197,7 +165,7 @@ func resetHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	key := fmt.Sprintf("%s_%s_%s", input.CharacterID, input.ScenarioID, input.UserID)
+	key := fmt.Sprintf("%s_%s", input.CharacterID, input.UserID)
 	delete(conversationHistory, key)
 	w.WriteHeader(http.StatusOK)
 }
