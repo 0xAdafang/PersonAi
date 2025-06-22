@@ -18,7 +18,7 @@ COPY go-api/ .
 COPY --from=rust-builder /build/rust-core/target/release/rust-core /app/rust-core
 
 
-RUN go build -o story-chan-api .
+RUN go build -o personai-api .
 
 EXPOSE 8080
-CMD ["./story-chan-api"]
+CMD ["./personai-api"]
