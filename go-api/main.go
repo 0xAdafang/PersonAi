@@ -60,6 +60,7 @@ type AskResponse struct {
 var conversationHistory = make(map[string][]string)
 const memoryLimit = 5
 
+
 func buildPrompt(input AskRequest) (string, error) {
 
 	char,err := loadCharacter(input.CharacterID)
@@ -70,14 +71,13 @@ func buildPrompt(input AskRequest) (string, error) {
 
 	key := fmt.Sprintf("%s_%s", input.CharacterID, input.UserID)
 	
-	memory := conversationHistory[key]
+	memory := loadHistory(key)
 
 	memory = append(memory, input.Question)
 	if len(memory) > memoryLimit {
 		memory = memory[len(memory)-memoryLimit:]
 	}
 
-	conversationHistory[key] = memory
 
 	payload := map[string]interface{}{
 		"character": map[string]string{
@@ -94,8 +94,10 @@ func buildPrompt(input AskRequest) (string, error) {
 		"user_persona": input.UserPersona,
 	}
 
-
 	jsonData, _ := json.Marshal(payload)
+
+	conversationHistory[key] = memory
+	saveHistory(key, memory)
 
 	cmd := exec.Command("./rust-core")
 	cmd.Stdin = bytes.NewBuffer(jsonData)
@@ -164,10 +166,28 @@ func resetHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Requête invalide", http.StatusBadRequest)
 		return
 	}
-
+	
 	key := fmt.Sprintf("%s_%s", input.CharacterID, input.UserID)
 	delete(conversationHistory, key)
+	os.Remove(fmt.Sprintf("data/history/%s.json", key))
 	w.WriteHeader(http.StatusOK)
+}
+
+func loadHistory(key string) []string {
+	path := fmt.Sprintf("data/history/%s.json", key)
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return []string{}
+	}
+	var history []string
+	json.Unmarshal(data, &history)
+	return history
+}
+
+func saveHistory(key string, history []string) {
+	path := fmt.Sprintf("data/history/%s.json", key)
+	data, _ := json.Marshal(history)
+	os.WriteFile(path, data, 0644)
 }
 	
 func main() {
