@@ -189,11 +189,17 @@ func saveHistory(key string, history []string) {
 	data, _ := json.Marshal(history)
 	os.WriteFile(path, data, 0644)
 }
+
+func healthHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
+}
 	
 func main() {
 
 	http.HandleFunc("/reset", resetHandler)
 	http.HandleFunc("/ask", askHandler)
+	http.HandleFunc("/health", healthHandler)
 	log.Println("🚀 Go API en écoute sur :8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 	
