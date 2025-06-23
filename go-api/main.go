@@ -75,20 +75,19 @@ func buildPrompt(input AskRequest) (string, error) {
 		memory = memory[len(memory)-memoryLimit:]
 	}
 
-	// Utilise directement la question utilisateur comme prompt
-	// Le formatage se fait côté Python maintenant
+	
 	prompt := input.Question
 	
-	// Détermine le modèle à utiliser (défaut: pygmalion)
+	
 	model := input.Model
 	if model == "" {
-		model = "pygmalion" // Meilleur pour les personnages
+		model = "pygmalion" 
 	}
 
 	conversationHistory[key] = memory
 	saveHistory(key, memory)
 
-	// Appelle Python avec le nouveau format
+	
 	response, err := callPythonLLM(prompt, char, memory, model)
 	if err != nil {
 		return "", err

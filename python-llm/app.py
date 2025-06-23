@@ -4,15 +4,15 @@ import json
 
 app = Flask(__name__)
 
-# Configuration des modèles disponibles
+
 MODELS = {
     "pygmalion": "pygmalion2",
     "mythomax": "mythomax-l2-13b", 
     "nous-hermes": "nous-hermes-llama2-13b",
-    "mistral": "mistral"  # Garde en fallback
+    "mistral": "mistral"  
 }
 
-# URL d'Ollama (adapté pour usage local, pas Docker)
+
 OLLAMA_URL = "http://localhost:11434/api/generate"
 
 def format_prompt_for_character(prompt_data):
@@ -109,9 +109,7 @@ def generate():
         })
 
 def clean_response(response):
-    """
-    Nettoie la réponse pour enlever les artefacts du prompt
-    """
+    
     # Enlève les instructions qui pourraient apparaître
     lines_to_remove = [
         "### Character Roleplay Instructions ###",
@@ -142,9 +140,7 @@ def list_models():
 
 @app.route("/health", methods=["GET"])
 def health_check():
-    """
-    Endpoint de santé
-    """
+    
     return jsonify({"status": "healthy", "service": "PersonAI LLM Service"})
 
 if __name__ == "__main__":
