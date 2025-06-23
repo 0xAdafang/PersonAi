@@ -8,7 +8,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"os/exec"
 )
 
 type Character struct {
@@ -51,6 +50,7 @@ type AskRequest struct {
 	UserID      string `json:"user_id"`
 	Style       string `json:"style"`
 	UserPersona string `json:"user_persona"`
+	Model       string `json:"model"`
 }
 
 type AskResponse struct {
@@ -62,67 +62,70 @@ const memoryLimit = 5
 
 
 func buildPrompt(input AskRequest) (string, error) {
-
-	char,err := loadCharacter(input.CharacterID)
+	char, err := loadCharacter(input.CharacterID)
 	if err != nil {
-		return "",err
+		return "", err
 	}
 
-
 	key := fmt.Sprintf("%s_%s", input.CharacterID, input.UserID)
-	
 	memory := loadHistory(key)
-
 	memory = append(memory, input.Question)
+	
 	if len(memory) > memoryLimit {
 		memory = memory[len(memory)-memoryLimit:]
 	}
 
-
-	payload := map[string]interface{}{
-		"character": map[string]string{
-			"name":        char.Name,
-			"tagline":     char.Tagline,
-			"description": char.Description,
-			"greeting":    char.Greeting,
-			"definition":  char.Definition,
-			
-		},
-		"style":  input.Style,
-		"memory": memory,
-		"user":   input.Question,
-		"user_persona": input.UserPersona,
+	// Utilise directement la question utilisateur comme prompt
+	// Le formatage se fait côté Python maintenant
+	prompt := input.Question
+	
+	// Détermine le modèle à utiliser (défaut: pygmalion)
+	model := input.Model
+	if model == "" {
+		model = "pygmalion" // Meilleur pour les personnages
 	}
-
-	jsonData, _ := json.Marshal(payload)
 
 	conversationHistory[key] = memory
 	saveHistory(key, memory)
 
-	cmd := exec.Command("./rust-core")
-	cmd.Stdin = bytes.NewBuffer(jsonData)
-	output, err := cmd.Output()
+	// Appelle Python avec le nouveau format
+	response, err := callPythonLLM(prompt, char, memory, model)
 	if err != nil {
 		return "", err
 	}
-	return string(output), nil
+
+	return response, nil
 }
 
-func callPythonLLM(prompt string) (string, error) {
-	payload := map[string]string{"prompt": prompt}
+func callPythonLLM(prompt string, character Character, memory []string, model string) (string, error) {
+	payload := map[string]interface{}{
+		"type": "character",
+		"model": model, // pygmalion, mythomax, nous-hermes, mistral
+		"character_name": character.Name,
+		"character_description": character.Description,
+		"character_personality": character.Tagline,
+		"character_background": character.Definition,
+		"user_message": prompt,
+		"memory": memory,
+	}
+
 	jsonData, _ := json.Marshal(payload)
 
-	resp, err := http.Post("http://python-llm:11434/generate", "application/json", bytes.NewBuffer(jsonData))
+	resp, err := http.Post("http://localhost:11434/generate", "application/json", bytes.NewBuffer(jsonData))
 	if err != nil {
 		return "", err
 	}
 	defer resp.Body.Close()
 
-	var result map[string]string
+	var result map[string]interface{}
 	body, _ := io.ReadAll(resp.Body)
 	json.Unmarshal(body, &result)
 
-	return result["response"], nil
+	if status, ok := result["status"].(string); ok && status != "succes" {
+		return fmt.Sprintf("[Erreur modèle: %v]", result["response"]), nil
+	}
+
+	return result["response"].(string), nil
 }
 
 func askHandler(w http.ResponseWriter, r *http.Request) {
@@ -137,14 +140,10 @@ func askHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	prompt, err := buildPrompt(req)
+	// Appelle directement buildPrompt qui gère tout maintenant
+	answer, err := buildPrompt(req)
 	if err != nil {
-		http.Error(w, "Erreur Rust : "+err.Error(), http.StatusInternalServerError)
-		return
-	}
-	answer, err := callPythonLLM(prompt)
-	if err != nil {
-		http.Error(w, "Erreur Python : "+err.Error(), http.StatusInternalServerError) 
+		http.Error(w, "Erreur service : "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
