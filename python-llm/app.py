@@ -130,9 +130,7 @@ def clean_response(response):
 
 @app.route("/models", methods=["GET"])
 def list_models():
-    """
-    Endpoint pour lister les modèles disponibles
-    """
+    
     return jsonify({
         "available_models": MODELS,
         "recommended": "pygmalion"
