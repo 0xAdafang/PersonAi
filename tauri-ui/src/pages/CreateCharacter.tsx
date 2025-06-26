@@ -1,5 +1,18 @@
 import { useState } from "react";
 
+const generateID = (name: string) => {
+  return name.toLowerCase().replace(/\s+/g, "-") + "_" + Date.now();
+};
+
+const parseTags = (tagString: string): Record<string, string[]> => {
+  const tags = tagString
+    .split(",")
+    .map((t) => t.trim())
+    .filter(Boolean);
+  
+  return {genreal: tags};
+};
+
 const CreateCharacter = () => {
   const [form, setForm] = useState({
     name: "",
@@ -14,16 +27,36 @@ const CreateCharacter = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = () => {
-    console.log("Saving character...", form);
-    
-    // - sauvegarder en JSON local
-    // - envoyer au backend Go
+  const handleSubmit = async () => {
+    const character = {
+      id: generateID(form.name),
+      name: form.name,
+      tagline: form.tagline,
+      description: form.description,
+      greeting: form.greeting,
+      definition: form.definition,
+      tags: parseTags(form.tags),
+    };
+
+    try {
+      const res = await fetch("http://localhost:8080/save-character", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(character),
+      });
+
+      if (!res.ok) throw new Error("API error");
+
+      alert("✅ Character saved!");
+    } catch (err) {
+      console.error("Error save:", err);
+      alert("❌ Save failed.");
+    }  
   };
 
   return (
     <div className="p-8 max-w-3xl mx-auto text-catppuccin-text">
-      <h1 className="text-2xl font-bold mb-6">🧙 Create a new character</h1>
+      <h1 className="text-2xl font-bold mb-6">Create a new character</h1>
 
       <div className="space-y-4">
         <Input label="Name" name="name" value={form.name} onChange={handleChange} />

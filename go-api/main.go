@@ -20,6 +20,63 @@ type Character struct {
 	Tags        map[string][]string `json:"tags"`
 }
 
+func saveCharacterHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Méthode non autorisée", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var newChar Character
+	if err := json.NewDecoder(r.Body).Decode(&newChar); err != nil {
+		http.Error(w, "Requête invalide", http.StatusBadRequest)
+		return
+	}
+
+	data, err := os.ReadFile("data/characters.json")
+	if err != nil && !os.IsNotExist(err) {
+		http.Error(w, "Erreur lecture JSON : "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	var characters []Character
+	if len(data) > 0 {
+		if err := json.Unmarshal(data, &characters); err != nil {
+			http.Error(w, "Erreur parsing JSON : "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+	} 
+
+	// Ajoute ou remplace si ID déjà présent
+	updated := false
+	for i, c := range characters {
+		if c.ID == newChar.ID {
+			characters[i] = newChar
+			updated = true
+			break
+		}
+	}
+
+	if !updated {
+		characters = append(characters, newChar)
+	}
+
+	updatedData, err := json.MarshalIndent(characters, "", "  ")
+	if err != nil {
+		http.Error(w, "Erreur encoding JSON : "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	err = os.WriteFile("data/characters.json", updatedData, 0644)
+	if err != nil {
+		http.Error(w, "Erreur écriture JSON : "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(map[string]string{"status": "saved"})
+
+}
+
 
 func loadCharacter(id string) (Character, error) {
 
@@ -198,8 +255,8 @@ func main() {
 	http.HandleFunc("/reset", resetHandler)
 	http.HandleFunc("/ask", askHandler)
 	http.HandleFunc("/health", healthHandler)
+	http.HandleFunc("/save-character", saveCharacterHandler)
 	log.Println("🚀 Go API en écoute sur :8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
-	
 }
 

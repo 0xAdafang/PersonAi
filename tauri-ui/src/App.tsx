@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Sidebar from "./components/Sidebar";
 import Header from "./components/Header";
 import Dashboard from "./pages/Dashboard";
+import CreateCharacter from "./pages/CreateCharacter";
 
 // TODO: importer ces pages quand elles existeront
 // import CreateCharacter from "./pages/CreateCharacter";
@@ -17,9 +18,9 @@ function App() {
           <Header />
           <Routes>
             <Route path="/" element={<Dashboard />} />
+            <Route path="/create-character" element={<CreateCharacter />} />
             {/* Routes futures */}
-            {/* <Route path="/create-character" element={<CreateCharacter />} />
-            <Route path="/choose-persona" element={<ChoosePersona />} />
+            {/*<Route path="/choose-persona" element={<ChoosePersona />} />
             <Route path="/chat" element={<ChatPage />} /> */}
           </Routes>
         </div>
