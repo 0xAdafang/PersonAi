@@ -8,7 +8,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::thread;
 use std::time::Duration;
-use tauri::{App, State};
+use tauri::{State};
 
 #[derive(Debug, Serialize, Deserialize)]
 struct AskRequest {
