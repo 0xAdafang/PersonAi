@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { invoke } from "@tauri-apps/api/core";
 
 const generateID = (name: string) => {
   return name.toLowerCase().replace(/\s+/g, "-") + "_" + Date.now();
@@ -39,20 +40,18 @@ const CreateCharacter = () => {
     };
 
     try {
-      const res = await fetch("http://localhost:8080/save-character", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify(character),
+      const res = await invoke("save_character", {
+        payload: JSON.stringify(character),
       });
 
-      if (!res.ok) throw new Error("API error");
-
       alert("✅ Character saved!");
+      console.log("Response:", res);
     } catch (err) {
-      console.error("Error save:", err);
+      console.error("Erreur invoke:", err);
       alert("❌ Save failed.");
-    }  
+    }
   };
+
 
   return (
     <div className="p-8 max-w-3xl mx-auto text-catppuccin-text">

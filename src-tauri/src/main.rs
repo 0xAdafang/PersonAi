@@ -3,12 +3,14 @@
 
 use serde::{Deserialize, Serialize};
 use reqwest;
-use std::process::{Command, Stdio};
+use std::collections::HashMap;
+use std::process::{Command, Output, Stdio};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
-use std::thread;
+use std::{fs, thread};
 use std::time::Duration;
 use tauri::{State};
+use std::io::Write;
 
 #[derive(Debug, Serialize, Deserialize)]
 struct AskRequest {
@@ -28,6 +30,16 @@ struct AskResponse {
 struct ResetRequest {
   user_id: String,
   character_id: String,
+}
+#[derive(Debug, Serialize, Deserialize)]
+struct Character {
+    id: String,
+    name: String,
+    tagline: String,
+    description: String,
+    greeting: String,
+    definition: String,
+    tags: HashMap<String, Vec<String>>, 
 }
 
 struct AppState {
@@ -130,6 +142,39 @@ async fn check_services() -> Result<String, String> {
   }
 }
 
+#[tauri::command]
+async fn save_character(character: Character) -> Result<String, String> {
+    let client = reqwest::Client::new();  // ← Comme tes autres fonctions
+    
+    match client
+        .post("http://localhost:8080/save-character")
+        .json(&character)
+        .send()
+        .await
+    {
+        Ok(response) => {
+            if response.status().is_success() {
+                Ok("Personnage sauvegardé".to_string())
+            } else {
+                Err(format!("Erreur sauvegarde: {}", response.status()))
+            }
+        }
+        Err(e) => Err(format!("Erreur de connexion: {}", e)),
+    }
+}
+
+#[tauri::command]
+async fn load_character() -> Result<String, String> {
+  
+  let path = "data/characters.json";
+
+  match fs::read_to_string(path) {
+    Ok(content) => Ok(content),
+    Err(e) => Err(format!("Erreur lecture fichier: {}", e)),
+  }
+}
+
+
 fn main() {
   let app_state = AppState {
     services_running: Arc::new(AtomicBool::new(false)),
@@ -141,7 +186,9 @@ fn main() {
       start_services,
       ask_question,
       reset_conversation,
-      check_services
+      check_services,
+      save_character,
+      load_character
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
