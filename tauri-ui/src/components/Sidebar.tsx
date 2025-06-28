@@ -1,21 +1,31 @@
 import { MessageSquare, UserPlus, Users, History, Sparkles, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { invoke } from "@tauri-apps/api/core";
+
+type Character = {
+  id: string;
+  name: string;
+  img?: string;
+};
 
 const Sidebar = () => {
   const navigate = useNavigate();
+  const [characters, setCharacters] = useState<Character[]>([]);
 
-  const characters = [
-    { name: "Riven", img: "/assets/1.png", id: "riven" },
-    { name: "Nexa", img: "/assets/3.png", id: "nexa" },
-  ];
+  useEffect(() => {
+    invoke<Character[]>("load_characters")
+      .then((res) => setCharacters(res.slice(0, 3))) 
+      .catch((err) => console.error("Failed to load characters", err));
+  }, []);
 
   return (
     <aside className="w-64 h-screen bg-zinc-900 text-white p-4 flex flex-col gap-4">
       <button
         onClick={() => navigate("/")}
-        className="flex items-center justify-center h-24"
+        className="flex items-center justify-center h-20"
       >
-        <img src="/assets/Logo.png" alt="Logo" className="h-36" />
+        <img src="/assets/Logo.png" alt="Logo" className="h-28" />
       </button>
 
       <nav className="flex flex-col gap-2 text-sm">
@@ -39,21 +49,27 @@ const Sidebar = () => {
         </Section>
       </nav>
 
-      <div className="mt-6">
-        <h2 className="text-xs uppercase tracking-wide text-gray-400 mb-2">Active Characters</h2>
-        <div className="flex flex-col gap-2">
-          {characters.map((char) => (
-            <button
-              key={char.id}
-              className="flex items-center gap-2 hover:bg-zinc-800 rounded px-2 py-1 text-left"
-              onClick={() => navigate(`/chat/${char.id}`)}
-            >
-              <img src={char.img} alt={char.name} className="w-8 h-8 rounded object-cover" />
-              <span>{char.name}</span>
-            </button>
-          ))}
+      {characters.length > 0 && (
+        <div className="mt-6">
+          <h2 className="text-xs uppercase tracking-wide text-gray-400 mb-2">Active Characters</h2>
+          <div className="flex flex-col gap-2">
+            {characters.map((char) => (
+              <button
+                key={char.id}
+                className="flex items-center gap-2 hover:bg-zinc-800 rounded px-2 py-1 text-left"
+                onClick={() => navigate(`/chat/${char.id}`)}
+              >
+                <img
+                  src={char.img || "/assets/characters/default.png"}
+                  alt={char.name}
+                  className="w-8 h-8 rounded object-cover"
+                />
+                <span>{char.name}</span>
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </aside>
   );
 };

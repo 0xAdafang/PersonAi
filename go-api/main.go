@@ -18,6 +18,7 @@ type Character struct {
 	Greeting    string              `json:"greeting"`
 	Definition  string              `json:"definition"` 
 	Tags        map[string][]string `json:"tags"`
+	Image		string				`json:"image"`
 }
 
 func saveCharacterHandler(w http.ResponseWriter, r *http.Request) {

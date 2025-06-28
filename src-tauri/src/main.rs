@@ -11,6 +11,7 @@ use std::{fs, thread};
 use std::time::Duration;
 use tauri::{State};
 use std::io::Write;
+use std::path::Path;
 
 #[derive(Debug, Serialize, Deserialize)]
 struct AskRequest {
@@ -40,6 +41,7 @@ struct Character {
     greeting: String,
     definition: String,
     tags: HashMap<String, Vec<String>>, 
+    img: String, 
 }
 
 struct AppState {
@@ -164,15 +166,15 @@ async fn save_character(character: Character) -> Result<String, String> {
 }
 
 #[tauri::command]
-async fn load_character() -> Result<String, String> {
-  
-  let path = "data/characters.json";
-
-  match fs::read_to_string(path) {
-    Ok(content) => Ok(content),
-    Err(e) => Err(format!("Erreur lecture fichier: {}", e)),
-  }
+fn load_characters() -> Result<Vec<Character>, String> {
+    use std::fs;
+    let path = "data/characters.json";
+    let content = fs::read_to_string(path)
+        .map_err(|e| format!("Erreur lecture fichier: {}", e))?;
+    serde_json::from_str::<Vec<Character>>(&content)
+        .map_err(|e| format!("Erreur parsing JSON: {}", e))
 }
+
 
 
 fn main() {
@@ -188,7 +190,7 @@ fn main() {
       reset_conversation,
       check_services,
       save_character,
-      load_character
+      load_characters,
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");

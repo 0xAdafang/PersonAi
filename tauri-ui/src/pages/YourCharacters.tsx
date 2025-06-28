@@ -10,6 +10,7 @@ type Character = {
   greeting: string;
   definition: string;
   tags: Record<string, string[]>;
+  img: string;
 };
 
 const YourCharacters = () => {
@@ -19,8 +20,7 @@ const YourCharacters = () => {
   useEffect(() => {
     invoke("load_characters")
       .then((res: any) => {
-        const parsed = JSON.parse(res);
-        setCharacters(parsed);
+        setCharacters(res);
       })
       .catch((err) => {
         console.error("Erreur chargement:", err);
@@ -39,7 +39,7 @@ const YourCharacters = () => {
           >
             <div className="flex items-center gap-4 mb-3">
               <img
-                src="/assets/1.png"
+                src={char.img || "/assets/characters/default.png"}
                 alt={char.name}
                 className="w-14 h-14 rounded object-cover border border-catppuccin-surface2"
               />

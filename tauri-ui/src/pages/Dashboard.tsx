@@ -1,3 +1,4 @@
+import { invoke } from "@tauri-apps/api/core";
 import CardButton from "../components/CardButton";
 
 const Dashboard = () => {
