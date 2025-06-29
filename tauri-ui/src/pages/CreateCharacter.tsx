@@ -43,7 +43,22 @@ const CreateCharacter = () => {
     input.onchange = (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (file) {
-        setForm({ ...form, img: file.name });
+        const reader = new FileReader();
+        reader.onload = () => {
+          const buffer = reader.result as ArrayBuffer;
+          const blob = new Blob([buffer]);
+          const newFilePath = `/assets/characters/${file.name}`;
+
+          invoke("copy_image_to_path", {
+            fileName: file.name,
+            data: Array.from(new Uint8Array(buffer))
+          }).then(() => {
+            setForm({...form, img: newFilePath });
+          }).catch((e) => {
+            console.error("Copy failed", e);
+          });
+        };
+        reader.readAsArrayBuffer(file);
       }
     };
     input.click();

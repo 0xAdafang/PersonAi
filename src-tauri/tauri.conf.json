@@ -6,9 +6,9 @@
   "build": {
     "frontendDist": "../tauri-ui/dist",
     "devUrl": "http://localhost:5143",
-    "beforeDevCommand": "npm run dev",
+    "beforeDevCommand": "npm run dev & cd ../go-api && go run main.go",
     "beforeBuildCommand": "npm run build"
-  },
+    },
   "app": {
     "windows": [
       {

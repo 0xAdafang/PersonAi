@@ -18,7 +18,7 @@ type Character struct {
 	Greeting    string              `json:"greeting"`
 	Definition  string              `json:"definition"` 
 	Tags        map[string][]string `json:"tags"`
-	Image		string				`json:"image"`
+	Img			string				`json:"img"`
 }
 
 func saveCharacterHandler(w http.ResponseWriter, r *http.Request) {
@@ -178,7 +178,7 @@ func callPythonLLM(prompt string, character Character, memory []string, model st
 	body, _ := io.ReadAll(resp.Body)
 	json.Unmarshal(body, &result)
 
-	if status, ok := result["status"].(string); ok && status != "succes" {
+	if status, ok := result["status"].(string); ok && status != "success" {
 		return fmt.Sprintf("[Erreur modèle: %v]", result["response"]), nil
 	}
 

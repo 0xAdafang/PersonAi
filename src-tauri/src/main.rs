@@ -4,14 +4,15 @@
 use serde::{Deserialize, Serialize};
 use reqwest;
 use std::collections::HashMap;
-use std::process::{Command, Output, Stdio};
+use std::process::{Command, Stdio};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
-use std::{fs, thread};
+use std::{thread};
 use std::time::Duration;
 use tauri::{State};
-use std::io::Write;
-use std::path::Path;
+use std::path::PathBuf;
+use std::fs;
+
 
 #[derive(Debug, Serialize, Deserialize)]
 struct AskRequest {
@@ -41,7 +42,7 @@ struct Character {
     greeting: String,
     definition: String,
     tags: HashMap<String, Vec<String>>, 
-    img: String, 
+    img: String,
 }
 
 struct AppState {
@@ -146,7 +147,7 @@ async fn check_services() -> Result<String, String> {
 
 #[tauri::command]
 async fn save_character(character: Character) -> Result<String, String> {
-    let client = reqwest::Client::new();  // ← Comme tes autres fonctions
+    let client = reqwest::Client::new();  
     
     match client
         .post("http://localhost:8080/save-character")
@@ -175,9 +176,38 @@ fn load_characters() -> Result<Vec<Character>, String> {
         .map_err(|e| format!("Erreur parsing JSON: {}", e))
 }
 
+#[tauri::command]
+fn copy_image_to_path(file_name: String, data: Vec<u8>) -> Result<(), String> {
+
+  let dest = std::path::PathBuf::from("../tauri-ui/public/assets/characters").join(&file_name);
+
+  if !dest.parent().unwrap().exists() {
+    return Err("Le dossier assets/characters n'existe pas".into());
+  }
+  fs::write(dest, data).map_err(|e| format!("Erreur écriture fichier : {}", e))
+}
+
+fn spawn_go_api() {
+    let _ = Command::new("go")
+        .arg("run")
+        .arg("../go-api/main.go")
+        .spawn()
+        .expect("❌ Impossible de lancer l'API Go");
+}
+
+fn spawn_python_llm() {
+    let _ = Command::new("python")
+        .args(["../python-llm/app.py"])
+        .spawn()
+        .expect("❌ Impossible de lancer le LLM Python");
+}
 
 
 fn main() {
+
+  spawn_go_api();
+  spawn_python_llm();
+  
   let app_state = AppState {
     services_running: Arc::new(AtomicBool::new(false)),
   };
@@ -191,7 +221,8 @@ fn main() {
       check_services,
       save_character,
       load_characters,
-    ])
-    .run(tauri::generate_context!())
-    .expect("error while running tauri application");
+      copy_image_to_path
+        ])
+        .run(tauri::generate_context!())
+        .expect("error while running tauri application");
 }
