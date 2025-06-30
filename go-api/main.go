@@ -101,6 +101,84 @@ func loadCharacter(id string) (Character, error) {
 
 }
 
+func deleteCharacterHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Méthode non autorisée", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var input struct {
+		ID string `json:"id"` 
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+		http.Error(w, "Requête invalide", http.StatusBadRequest)
+		return
+	}
+
+	data, err := os.ReadFile("data/characters.json")
+	if err != nil {
+		http.Error(w, "Erreur lecture JSON : "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	var characters []Character
+	if err := json.Unmarshal(data, &characters); err != nil {
+		http.Error(w, "Erreur parsing JSON : "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	var removedImg string
+	filtered := []Character{}
+	for _, c := range characters {
+		if c.ID != input.ID {
+			filtered = append(filtered, c)
+		} else {
+			removedImg = c.Img
+		}
+	}
+
+	if len(filtered) == len(characters) {
+		http.Error(w, "Personnage introuvable", http.StatusNotFound)
+		return
+	}
+
+	updatedData, err := json.MarshalIndent(filtered, "", "  ")
+	if err != nil {
+		http.Error(w, "Erreur encodage JSON", http.StatusInternalServerError)
+		return
+	}
+
+	err = os.WriteFile("data/characters.json", updatedData, 0644)
+	if err != nil {
+		http.Error(w, "Erreur écriture fichier", http.StatusInternalServerError)
+		return
+	}
+
+	if removedImg != "" && removedImg != "placeholder.png" {
+		imgPath := fmt.Sprintf("src-tauri%s", removedImg)
+		if _, err := os.Stat(imgPath); err == nil {
+			os.Remove(imgPath)
+		}
+	}
+
+		historyDir := "data/history"
+		entries, err := os.ReadDir(historyDir)
+		if err == nil {
+			for _, entry := range entries {
+				if !entry.IsDir() && entry.Name() != "" {
+					if matched := (len(entry.Name()) >= len(input.ID)+1 && entry.Name()[:len(input.ID)+1] == input.ID+"_"); matched {
+						os.Remove(fmt.Sprintf("%s/%s", historyDir, entry.Name()))
+					}
+				}
+			}
+		}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{"status": "deleted"})
+
+}
+
 
 type AskRequest struct {
 	Question    string `json:"question"`
@@ -257,6 +335,7 @@ func main() {
 	http.HandleFunc("/ask", askHandler)
 	http.HandleFunc("/health", healthHandler)
 	http.HandleFunc("/save-character", saveCharacterHandler)
+	http.HandleFunc("/delete-character", deleteCharacterHandler)
 	log.Println("🚀 Go API en écoute sur :8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }

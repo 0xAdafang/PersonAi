@@ -10,7 +10,7 @@ use std::sync::Arc;
 use std::{thread};
 use std::time::Duration;
 use tauri::{State};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::fs;
 
 
@@ -187,6 +187,58 @@ fn copy_image_to_path(file_name: String, data: Vec<u8>) -> Result<(), String> {
   fs::write(dest, data).map_err(|e| format!("Erreur écriture fichier : {}", e))
 }
 
+#[tauri::command]
+fn delete_character(id: String) -> Result<(), String> {
+
+  let path = Path::new("data/characters.json");
+
+  let data = fs::read_to_string(path).map_err(|e| e.to_string())?;
+  let mut characters: Vec<serde_json::Value> = serde_json::from_str(&data).map_err(|e| e.to_string())?;
+  let original_len = characters.len();
+
+  let mut removed_img: Option<String> = None;
+
+  characters.retain(|c| {
+    if c["id"] == id {
+      if let Some(img) = c["img"].as_str() {
+        removed_img = Some(img.to_string());
+      }
+      false
+    } else {
+      true
+    }
+  });
+
+  if characters.len() == original_len {
+    return Err("Character not found".into());
+  }
+
+  if let Some(img_path) = removed_img {
+    if img_path != "placeholder.png" {
+      let full_path = Path::new("src-tauri").join(img_path.trim_start_matches('/'));
+      if full_path.exists() {
+        let _ = fs::remove_file(&full_path);
+      }
+    }
+  }
+
+  let history_dir = Path::new("data/history");
+  if let Ok(entries) = fs::read_dir(history_dir) {
+    for entry in entries.flatten() {
+      if let Ok(file_name) = entry.file_name().into_string() {
+        if file_name.starts_with(&format!("{} ", id)) {
+          let _ = fs::remove_file(entry.path());
+        }
+      }
+    }
+  }
+
+  let updated = serde_json::to_string_pretty(&characters).map_err(|e| e.to_string())?;
+  fs::write(path, updated).map_err(|e| e.to_string())?;
+
+  Ok(())
+}
+
 fn spawn_go_api() {
     let _ = Command::new("go")
         .arg("run")
@@ -221,7 +273,8 @@ fn main() {
       check_services,
       save_character,
       load_characters,
-      copy_image_to_path
+      copy_image_to_path,
+      delete_character
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

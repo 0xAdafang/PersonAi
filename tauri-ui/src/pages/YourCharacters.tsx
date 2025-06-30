@@ -17,7 +17,7 @@ const YourCharacters = () => {
   const [characters, setCharacters] = useState<Character[]>([]);
   const navigate = useNavigate();
 
-  useEffect(() => {
+  const loadCharacters = () => {
     invoke("load_characters")
       .then((res: any) => {
         setCharacters(res);
@@ -25,7 +25,25 @@ const YourCharacters = () => {
       .catch((err) => {
         console.error("Erreur chargement:", err);
       });
+  };
+
+  useEffect(() => {
+    loadCharacters();
   }, []);
+
+  const handleDelete = async (id: string, name: string) => {
+    const confirmed = confirm(`⚠️ Are you sure you want to delete "${name}"? This action is irreversible.`);
+    if (!confirmed) return;
+
+    try {
+      await invoke("delete_character", { id });
+      alert(`🗑️ "${name}" deleted successfully.`);
+      loadCharacters(); // reload list
+    } catch (err) {
+      console.error("Erreur suppression:", err);
+      alert("❌ Failed to delete character.");
+    }
+  };
 
   return (
     <div className="p-8 max-w-5xl mx-auto text-catppuccin-text space-y-6">
@@ -49,19 +67,27 @@ const YourCharacters = () => {
               </div>
             </div>
 
-            <div className="flex justify-between mt-3">
+            <div className="flex justify-between mt-3 text-sm">
               <button
-                className="text-sm text-catppuccin-mauve hover:underline"
+                className="text-catppuccin-mauve hover:underline"
                 onClick={() => navigate(`/chat/${char.id}`)}
               >
                 → Start Chat
               </button>
-              <button
-                className="text-sm text-catppuccin-subtext1 hover:underline"
-                onClick={() => alert(char.description)}
-              >
-                View
-              </button>
+              <div className="space-x-2">
+                <button
+                  className="text-catppuccin-subtext1 hover:underline"
+                  onClick={() => alert(char.description)}
+                >
+                  View
+                </button>
+                <button
+                  className="text-red-400 hover:underline"
+                  onClick={() => handleDelete(char.id, char.name)}
+                >
+                  Delete
+                </button>
+              </div>
             </div>
           </div>
         ))}

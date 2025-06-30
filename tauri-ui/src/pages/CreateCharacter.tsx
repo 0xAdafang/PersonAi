@@ -118,8 +118,8 @@ const CreateCharacter = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-gray-900 to-black text-white">
-      <div className="min-h-screen bg-gradient-to-br from-purple-900/80 via-gray-900/80 to-black/80">
+    <div className="min-h-screen bg-catppuccin-base text-catppuccin-text">
+      <div className="min-h-screen">
         <div className="max-w-4xl mx-auto p-6">
         
         
@@ -143,14 +143,20 @@ const CreateCharacter = () => {
             className="relative w-32 h-32 rounded-full bg-gradient-to-br from-purple-800 to-purple-900 border-2 border-purple-600 hover:border-purple-400 cursor-pointer overflow-hidden group transition-all"
           >
             {form.img ? (
-              <div className="w-full h-full flex items-center justify-center bg-purple-700">
-                <span className="text-xs text-center px-2">{form.img}</span>
-              </div>
-            ) : (
-              <div className="w-full h-full flex items-center justify-center">
-                <div className="text-4xl">🦊</div>
-              </div>
-            )}
+              <img 
+                src={form.img} 
+                alt="Character preview"
+                className="w-full h-full object-cover transition-opacity duration-300"
+                onLoad={(e) => {
+                  e.currentTarget.style.opacity = '1';
+                }}
+                style={{ opacity: 0 }}
+              />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <div className="text-4xl">🦊</div>
+                </div>
+              )}
             <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
               <span className="text-sm">Upload</span>
             </div>
