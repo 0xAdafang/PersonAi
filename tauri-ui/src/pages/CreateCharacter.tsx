@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 
 
@@ -10,6 +10,8 @@ const generateID = (name: string) => {
 
 const CreateCharacter = () => {
   const navigate = useNavigate();
+  const { id } = useParams();
+
   const [form, setForm] = useState({
     name: "",
     tagline: "",
@@ -30,6 +32,22 @@ const CreateCharacter = () => {
     "Love interest", "One-sided", "Magicverse", "Royalverse", "Comics",
     "SFW", "NSFW", "Dominant", "Submissive", "Male", "Female", "Non-binary"
   ];
+
+  useEffect(() => {
+    if (id) {
+      invoke("load_character", { id }).then((char: any) => {
+        setForm({
+          name: char.name,
+          tagline: char.tagline,
+          description: char.description,
+          greeting: char.greeting,
+          definition: char.definition,
+          img: char.img,
+        });
+        setSelectedTags(char.tags?.general || []);
+      });
+    }
+  }, [id]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -78,8 +96,8 @@ const CreateCharacter = () => {
       return;
     }
 
-    const character = {
-      id: generateID(form.name),
+  const character = {
+      id: id || generateID(form.name),
       name: form.name,
       tagline: form.tagline,
       description: form.description,
