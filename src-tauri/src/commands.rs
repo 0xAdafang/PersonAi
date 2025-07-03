@@ -1,9 +1,9 @@
-use crate::file_utils::{copy_image_file, delete_character_from_file, read_characters_file};
+use crate::file_utils::{self, copy_image_file, delete_character_from_file, read_characters_file};
 use crate::services::{
     check_service_health, make_http_request, make_simple_post_request, start_go_service,
     start_python_service, SERVICE_STARTUP_DELAY,
 };
-use crate::types::{AppState, AskRequest, AskResponse, Character, ResetRequest};
+use crate::types::{AppState, AskRequest, AskResponse, Character, Persona, ResetRequest};
 use std::sync::atomic::Ordering;
 use std::thread;
 use std::time::Duration;
@@ -69,3 +69,28 @@ pub fn update_character(character: Character) -> Result<(), String> {
     crate::file_utils::update_character(character)
 }
 
+#[tauri::command]
+pub fn load_personas() -> Result<Vec<Persona>, String> {
+    file_utils::read_personas_file()
+}
+
+#[tauri::command]
+pub fn save_persona(persona: Persona) -> Result<String, String> {
+    file_utils::update_persona(persona)
+        .map(|_| "Persona sauvegardée".to_string())
+}
+
+#[tauri::command]
+pub fn delete_persona(persona_id: String) -> Result<(), String> {
+    file_utils::delete_persona_from_file(&persona_id)
+}
+
+#[tauri::command]
+pub fn copy_image_to_persona(file_name: String, data: Vec<u8>) -> Result<(), String> {
+    file_utils::copy_persona_image_file(file_name, data)
+}
+
+#[tauri::command]
+pub fn update_persona(persona: Persona) -> Result<(), String> {
+    file_utils::update_persona(persona)
+}

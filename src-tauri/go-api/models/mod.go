@@ -11,6 +11,14 @@ type Character struct {
 	Img         string              `json:"img"`
 }
 
+type Persona struct {
+	ID           string `json:"id"`
+	DisplayName  string `json:"display_name"`
+	Background   string `json:"background"`
+	Img          string `json:"img"`
+}
+
+
 type AskRequest struct {
 	Question    string `json:"question"`
 	CharacterID string `json:"character_id"`

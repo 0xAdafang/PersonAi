@@ -9,12 +9,14 @@ import (
 )
 
 const characterFile = "data/characters.json"
+const personaFile = "data/personas.json"
 
-// LoadCharacters lit le fichier JSON et retourne la liste des personnages
+
+
 func LoadCharacters() ([]models.Character, error) {
 	data, err := os.ReadFile(characterFile)
 	if err != nil {
-		// S'il n'existe pas, on retourne une liste vide
+		
 		if errors.Is(err, os.ErrNotExist) {
 			return []models.Character{}, nil
 		}
@@ -30,7 +32,7 @@ func LoadCharacters() ([]models.Character, error) {
 	return characters, nil
 }
 
-// SaveCharacters écrit la liste des personnages dans le fichier JSON
+
 func SaveCharacters(characters []models.Character) error {
 	data, err := json.MarshalIndent(characters, "", "  ")
 	if err != nil {
@@ -58,4 +60,43 @@ func UpdateOrInsertCharacter(newChar models.Character) error {
 	}
 
 	return SaveCharacters(characters)
+}
+
+func LoadPersonas() ([]models.Persona, error) {
+	data, err := os.ReadFile(personaFile)
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return []models.Persona{}, nil
+		}
+		return nil, err
+	}
+	var personas []models.Persona
+	if len(data) > 0 {
+		if err := json.Unmarshal(data, &personas); err != nil {
+			return nil, err
+		}
+	}
+	return personas, nil
+}
+
+func SavePersonas(personas []models.Persona) error {
+	data, err := json.MarshalIndent(personas, "", "  ")
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(personaFile, data, 0644)
+}
+
+func DeletePersonaByID(id string) error {
+	personas, err := LoadPersonas() 
+	if err != nil {
+		return err
+	}
+	filtered := []models.Persona{}
+	for _, p := range personas {
+		if p.ID != id {
+			filtered = append(filtered, p)
+		}
+	}
+	return SavePersonas(filtered)
 }

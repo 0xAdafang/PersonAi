@@ -5,11 +5,11 @@ import Dashboard from "./pages/Dashboard";
 import CreateCharacter from "./pages/CreateCharacter";
 import YourCharacters from "./pages/YourCharacters";
 import EditCharacter from "./pages/EditCharacter";
+import CreatePersona from "./pages/CreatePersona";
+import YourPersonas from "./pages/YourPersonas";
+import EditPersona from "./pages/EditPersona";
 
-// TODO: importer ces pages quand elles existeront
-// import CreateCharacter from "./pages/CreateCharacter";
-// import ChoosePersona from "./pages/ChoosePersona";
-// import ChatPage from "./pages/ChatPage";
+
 
 function App() {
   return (
@@ -23,9 +23,10 @@ function App() {
             <Route path="/create-character" element={<CreateCharacter />} />
             <Route path="/characters" element={<YourCharacters />} />
             <Route path="/edit/:id" element={<EditCharacter />} />
-            {/* Routes futures */}
-            {/*<Route path="/choose-persona" element={<ChoosePersona />} />
-            <Route path="/chat" element={<ChatPage />} /> */}
+            <Route path="/create-persona" element={<CreatePersona />} />
+            <Route path="/personas" element={<YourPersonas />} />
+            <Route path="/edit-persona/:id" element={<EditPersona />} />
+           
           </Routes>
         </div>
       </div>

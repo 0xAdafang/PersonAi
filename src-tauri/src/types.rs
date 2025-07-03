@@ -35,6 +35,14 @@ pub struct Character {
     pub img: String,
 }
 
+#[derive(Serialize, Deserialize, Clone)]
+pub struct Persona {
+    pub id: String,
+    pub display_name: String,
+    pub background: String,
+    pub img: String,
+}
+
 pub struct AppState {
     pub services_running: Arc<AtomicBool>,
 }

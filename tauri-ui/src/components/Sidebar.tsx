@@ -40,7 +40,7 @@ const Sidebar = () => {
         </Section>
 
         <Section title="Personas">
-          <SidebarLink icon={User} label="Choose" onClick={() => navigate("/choose-persona")} />
+          <SidebarLink icon={User} label="Create" onClick={() => navigate("/create-persona")} />
           <SidebarLink icon={Users} label="Manage" onClick={() => navigate("/personas")} />
         </Section>
 

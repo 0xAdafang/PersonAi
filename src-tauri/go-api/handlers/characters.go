@@ -90,13 +90,13 @@ func DeleteCharacterHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Supprimer image si pas placeholder
+	
 	if removedImg != "" && !strings.Contains(removedImg, "placeholder") {
 		full := filepath.Join("src-tauri", removedImg)
 		_ = os.Remove(full)
 	}
 
-	// Supprimer fichiers de mémoire
+	
 	utils.DeleteAllHistoryForCharacter(input.ID)
 
 	w.WriteHeader(http.StatusOK)

@@ -12,7 +12,7 @@ const Dashboard = () => {
       <CardButton
         description="Define who you are in the story"
         image="/assets/4.png"
-        to="/choose-persona"
+        to="/create-persona"
       />
 
       <CardButton

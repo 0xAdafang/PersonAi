@@ -30,7 +30,12 @@ fn main() {
             load_characters,
             copy_image_to_path,
             delete_character,
-            update_character
+            update_character,
+            save_persona,
+            load_personas,
+            delete_persona,
+            update_persona,
+            copy_image_to_persona,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
