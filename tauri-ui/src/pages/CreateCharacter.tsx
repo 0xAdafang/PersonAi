@@ -35,7 +35,7 @@ const CreateCharacter = () => {
 
   useEffect(() => {
     if (id) {
-      invoke("load_character", { id }).then((char: any) => {
+      invoke("load_characters", { id }).then((char: any) => {
         setForm({
           name: char.name,
           tagline: char.tagline,

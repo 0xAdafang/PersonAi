@@ -1,13 +1,14 @@
 use crate::file_utils::{self, copy_image_file, delete_character_from_file, read_characters_file};
 use crate::services::{
-    check_service_health, make_http_request, make_simple_post_request, start_go_service,
-    start_python_service, SERVICE_STARTUP_DELAY,
+    self, check_service_health, make_http_request, make_simple_post_request, start_go_service, start_python_service, SERVICE_STARTUP_DELAY
 };
-use crate::types::{AppState, AskRequest, AskResponse, Character, Persona, ResetRequest};
+use crate::types::{AppState, AskRequest, AskRequestForChat, AskResponse, Character, ChatMessage, Persona, ResetRequest};
 use std::sync::atomic::Ordering;
 use std::thread;
 use std::time::Duration;
 use tauri::State;
+use serde::{Deserialize, Serialize};
+
 
 #[tauri::command]
 pub async fn start_services(state: State<'_, AppState>) -> Result<String, String> {
@@ -93,4 +94,45 @@ pub fn copy_image_to_persona(file_name: String, data: Vec<u8>) -> Result<(), Str
 #[tauri::command]
 pub fn update_persona(persona: Persona) -> Result<(), String> {
     file_utils::update_persona(persona)
+}
+
+#[tauri::command]
+pub async fn chat_with_character(input: String,character_id: String,persona_id: String,history: Vec<ChatMessage>,) -> Result<String, String> {
+    let ask_request = AskRequestForChat {
+        question: input,
+        character_id,
+        user_id: persona_id,
+        model: "vicuna".to_string(),
+        memory: history,
+    };
+
+    match make_http_request::<AskRequestForChat, AskResponse>("/ask", &ask_request).await {
+        Ok(response) => Ok(response.answer),
+        Err(e) => Err(format!("Erreur LLM: {}", e)),
+    }
+}
+
+#[tauri::command]
+pub fn load_character_by_id(id: String) -> Result<Character, String> {
+    let characters = read_characters_file()?;
+    
+    characters
+        .into_iter()
+        .find(|c| c.id == id)
+        .ok_or_else(|| format!("Personnage avec l'ID '{}' non trouvé", id))
+}
+
+#[tauri::command]
+pub fn load_persona_by_id(id: String) -> Result<Persona, String> {
+    let personas = file_utils::read_personas_file()?;
+    
+    personas
+        .into_iter()
+        .find(|p| p.id == id)
+        .ok_or_else(|| format!("Persona avec l'ID '{}' non trouvé", id))
+}
+
+#[tauri::command]
+pub async fn check_services_status() -> Result<String, String> {
+    services::check_all_services_health().await
 }

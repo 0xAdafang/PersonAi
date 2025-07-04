@@ -46,3 +46,18 @@ pub struct Persona {
 pub struct AppState {
     pub services_running: Arc<AtomicBool>,
 }
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ChatMessage {
+    pub role: String,
+    pub content: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct AskRequestForChat {
+    pub question: String,
+    pub character_id: String,
+    pub user_id: String,
+    pub model: String,
+    pub memory: Vec<ChatMessage>,
+}

@@ -31,3 +31,8 @@ type AskRequest struct {
 type AskResponse struct {
 	Answer string `json:"answer"`
 }
+
+type ChatMessage struct {
+	Role    string `json:"role"`
+	Content string `json:"content"`
+}

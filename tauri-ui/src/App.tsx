@@ -8,6 +8,8 @@ import EditCharacter from "./pages/EditCharacter";
 import CreatePersona from "./pages/CreatePersona";
 import YourPersonas from "./pages/YourPersonas";
 import EditPersona from "./pages/EditPersona";
+import ChatSetup from "./pages/ChatSetup";
+import ChatPage from "./pages/ChatPage";
 
 
 
@@ -26,6 +28,8 @@ function App() {
             <Route path="/create-persona" element={<CreatePersona />} />
             <Route path="/personas" element={<YourPersonas />} />
             <Route path="/edit-persona/:id" element={<EditPersona />} />
+            <Route path="/chat" element={<ChatSetup />} />
+            <Route path="/chat/:characterId/:personaId" element={<ChatPage />} />
            
           </Routes>
         </div>

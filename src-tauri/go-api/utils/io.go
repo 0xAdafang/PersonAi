@@ -4,12 +4,14 @@ import (
 	"encoding/json"
 	"errors"
 	"os"
-
+	"path/filepath"
 	"go-api/models"
 )
 
-const characterFile = "data/characters.json"
-const personaFile = "data/personas.json"
+
+
+var characterFile = filepath.Join("..", "data", "characters.json")
+var personaFile = filepath.Join("..", "data", "personas.json")
 
 
 
@@ -29,6 +31,7 @@ func LoadCharacters() ([]models.Character, error) {
 			return nil, err
 		}
 	}
+	
 	return characters, nil
 }
 

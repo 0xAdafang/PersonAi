@@ -16,6 +16,8 @@ func main() {
 	http.HandleFunc("/personas", handlers.ListPersonasHandler)
 	http.HandleFunc("/ask", handlers.AskHandler)
 	http.HandleFunc("/reset", handlers.ResetHandler)
+	http.HandleFunc("/debug/paths", handlers.DebugPathsHandler)
+
 
 
 	log.Println("\U0001F680 Go API en écoute sur :8080")

@@ -29,8 +29,8 @@ func SavePersonaHandler(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 	}
-	if found {
-		list = append(list,p)
+	if !found {
+		list = append(list, p)
 	}
 
 	if err := utils.SavePersonas(list); err != nil {

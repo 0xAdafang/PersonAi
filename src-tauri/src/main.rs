@@ -5,15 +5,15 @@ mod services;
 mod file_utils;
 mod commands;
 
-use crate::services::{spawn_go_api, spawn_python_llm};
+
+use crate::services::start_all_services;
 use crate::types::AppState;
 use crate::commands::*;
 use std::sync::atomic::AtomicBool;
 use std::sync::Arc;
 
 fn main() {
-    spawn_go_api();
-    spawn_python_llm();
+    start_all_services();
     
     let app_state = AppState {
         services_running: Arc::new(AtomicBool::new(false)),
@@ -36,7 +36,12 @@ fn main() {
             delete_persona,
             update_persona,
             copy_image_to_persona,
+            chat_with_character,
+            load_character_by_id,
+            load_persona_by_id,
+            check_services_status,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
+

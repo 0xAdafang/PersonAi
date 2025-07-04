@@ -1,18 +1,12 @@
 from flask import Flask, request, jsonify
 import requests
 import json
+import os
 
 app = Flask(__name__)
 
-
-MODELS = {
-    "pygmalion": "pygmalion2",
-    "mythomax": "mythomax-l2-13b", 
-    "nous-hermes": "nous-hermes-llama2-13b",
-    "mistral": "mistral"  
-}
-
-
+# ✅ Simplifié : Vicuna uniquement
+MODEL_NAME = "vicuna:latest"
 OLLAMA_URL = "http://localhost:11434/api/generate"
 
 def format_prompt_for_character(prompt_data):
@@ -49,51 +43,58 @@ Current user message: {prompt_data.get('user_message', '')}
 def generate():
     data = request.get_json()
     
-    # Récupère le modèle demandé (défaut: pygmalion)
-    requested_model = data.get("model", "pygmalion")
-    model_name = MODELS.get(requested_model, MODELS["pygmalion"])
+    print("📨 Reçu du backend Go :")
+    print(json.dumps(data, indent=2))
+    print(f"🎯 Modèle utilisé: {MODEL_NAME}")
     
     # Traite le prompt selon le type
     if data.get("type") == "character":
-        # Prompt spécialisé pour les personnages
         formatted_prompt = format_prompt_for_character(data)
     else:
-        # Prompt simple
         formatted_prompt = data.get("prompt", "")
     
     try:
-        # Paramètres optimisés pour le roleplay
+        # Payload pour Ollama avec Vicuna
         ollama_payload = {
-            "model": model_name,
+            "model": MODEL_NAME,
             "prompt": formatted_prompt,
             "stream": False,
             "options": {
-                "temperature": 0.8,      # Plus créatif
-                "top_p": 0.9,           # Diversité contrôlée
-                "top_k": 40,            # Limite les choix
-                "repeat_penalty": 1.1,   # Évite les répétitions
-                "num_ctx": 4096,        # Contexte étendu
-                "num_predict": 512      # Réponses plus longues
+                "temperature": 0.8,
+                "top_p": 0.9,
+                "top_k": 40,
+                "repeat_penalty": 1.1,
+                "num_ctx": 4096,
+                "num_predict": 512
             }
         }
         
+        print(f"🚀 API utilisée: {OLLAMA_URL}")
+        print(f"🚀 Modèle utilisé: {MODEL_NAME}")
+        print("🚀 Payload envoyé à Ollama:")
+        print(json.dumps(ollama_payload, indent=2))
+        
         response = requests.post(OLLAMA_URL, json=ollama_payload, timeout=60)
+        
+        print(f"📡 Réponse Ollama - Status: {response.status_code}")
+        print(f"📡 Réponse Ollama - Content: {response.text}")
         
         if response.status_code == 200:
             result = response.json()
             ai_response = result.get("response", "[Erreur réponse Ollama]")
             
-            # Nettoie la réponse (enlève les instructions visibles)
+            # Nettoie la réponse
             cleaned_response = clean_response(ai_response)
             
             return jsonify({
                 "response": cleaned_response,
-                "model_used": model_name,
+                "model_used": MODEL_NAME,
+                "api_used": "generate",
                 "status": "success"
             })
         else:
             return jsonify({
-                "response": f"[Erreur Ollama HTTP {response.status_code}]",
+                "response": f"[Erreur Ollama HTTP {response.status_code}] - {response.text}",
                 "status": "error"
             })
             
@@ -103,13 +104,16 @@ def generate():
             "status": "timeout"
         })
     except Exception as e:
+        print(f"❌ Exception: {e}")
         return jsonify({
             "response": f"[Erreur appel Ollama : {e}]",
             "status": "error"
         })
 
 def clean_response(response):
-    
+    """
+    Nettoie la réponse du modèle
+    """
     # Enlève les instructions qui pourraient apparaître
     lines_to_remove = [
         "### Character Roleplay Instructions ###",
@@ -130,19 +134,27 @@ def clean_response(response):
 
 @app.route("/models", methods=["GET"])
 def list_models():
-    
+    """
+    Retourne le modèle disponible
+    """
     return jsonify({
-        "available_models": MODELS,
-        "recommended": "pygmalion"
+        "available_model": MODEL_NAME,
+        "status": "ready"
     })
 
 @app.route("/health", methods=["GET"])
 def health_check():
-    
-    return jsonify({"status": "healthy", "service": "PersonAI LLM Service"})
+    """
+    Vérification de santé du service
+    """
+    return jsonify({
+        "status": "healthy", 
+        "service": "PersonAI LLM Service",
+        "model": MODEL_NAME
+    })
 
 if __name__ == "__main__":
     print("🤖 PersonAI LLM Service démarré")
-    print(f"📍 Modèles disponibles: {list(MODELS.keys())}")
+    print(f"📍 Modèle utilisé: {MODEL_NAME}")
     print("🔗 Ollama URL:", OLLAMA_URL)
-    app.run(host="0.0.0.0", port=11434, debug=True)
+    app.run(host="0.0.0.0", port=5050, debug=True)

@@ -3,6 +3,7 @@ package utils
 import (
 	"encoding/json"
 	"fmt"
+	"go-api/models"
 	"os"
 	"path/filepath"
 )
@@ -10,33 +11,31 @@ import (
 const historyDir = "data/history"
 const memoryLimit = 5
 
-// LoadHistory retourne les derniers messages associés à une session
-func LoadHistory(key string) []string {
-	path := filepath.Join(historyDir, fmt.Sprintf("%s.json", key))
+
+func LoadHistory(key string) []models.ChatMessage {
+	path := fmt.Sprintf("data/history/%s.json", key)
 	data, err := os.ReadFile(path)
 	if err != nil {
-		return []string{}
+		return []models.ChatMessage{}
 	}
 
-	var history []string
-	if err := json.Unmarshal(data, &history); err != nil {
-		return []string{}
+	var messages []models.ChatMessage
+	if err := json.Unmarshal(data, &messages); err != nil {
+		return []models.ChatMessage{}
 	}
-	return history
+	return messages
 }
 
-// SaveHistory écrit les messages pour une session
-func SaveHistory(key string, history []string) {
-	if len(history) > memoryLimit {
-		history = history[len(history)-memoryLimit:]
+func SaveHistory(key string, messages []models.ChatMessage) error {
+	path := fmt.Sprintf("data/history/%s.json", key)
+	data, err := json.MarshalIndent(messages, "", "  ")
+	if err != nil {
+		return err
 	}
-
-	path := filepath.Join(historyDir, fmt.Sprintf("%s.json", key))
-	data, _ := json.Marshal(history)
-	_ = os.WriteFile(path, data, 0644)
+	return os.WriteFile(path, data, 0644)
 }
 
-// DeleteAllHistoryForCharacter supprime tous les fichiers `id_*.json`
+
 func DeleteAllHistoryForCharacter(charID string) {
 	entries, err := os.ReadDir(historyDir)
 	if err != nil {
