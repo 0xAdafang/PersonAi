@@ -53,7 +53,7 @@ const Sidebar = () => {
           setRecentChats(data.slice(0, 5)); 
         }
       } catch (error) {
-        console.error("Erreur chargement chats récents:", error);
+        console.error("Error with loading", error);
         
        
         try {
@@ -76,7 +76,7 @@ const Sidebar = () => {
 
   const handleRecentChatClick = (characterId: string, personaId: string) => {
     
-    console.log(`Navigation vers: /chat/${characterId}/${personaId}`);
+    console.log(`Navigation towards: /chat/${characterId}/${personaId}`);
     navigate(`/chat/${characterId}/${personaId}`);
   };
 

@@ -143,29 +143,59 @@ pub fn load_recent_chats() -> Result<Vec<RecentChat>, String> {
     let mut chats = vec![];
 
     if let Ok(entries) = std::fs::read_dir(path) {
-        for entry in entries.flatten(){
+        for entry in entries.flatten() {
             let path = entry.path();
             if path.extension().map(|e| e == "json").unwrap_or(false) {
-                if let Ok(content) = std::fs::read_to_string(&path) {
-                    if let Ok(chat) = serde_json::from_str::<serde_json::Value>(&content) {
-                        let character_id = chat.get("chatacterId").and_then(|v| v.as_str()).unwrap_or("unknown").to_string();
-                        let persona_id = chat.get("personaId").and_then(|v| v.as_str()).unwrap_or("unknown").to_string();
-                        let name = chat.get("characterName").and_then(|v| v.as_str()).unwrap_or("Unknown").to_string();
-                        let img = chat.get("characterImg").and_then(|v| v.as_str()).map(|s| s.to_string());
-                        let timestamp = chat.get("lastUsed").and_then(|v| v.as_u64()).unwrap_or(0);
-
-                        chats.push(RecentChat {
-                            character_id,
-                            persona_id,
-                            name,
-                            img,
-                            last_used: timestamp,
-                        });
+                if let Some(file_stem) = path.file_stem().and_then(|s| s.to_str()) {
+                  
+                    let parts: Vec<&str> = file_stem.split('_').collect();
+                    if parts.len() >= 2 {
+                        let character_id = parts[0].to_string();
+                        let persona_id = parts[1..].join("_"); 
+                        
+                       
+                        if let Ok(content) = std::fs::read_to_string(&path) {
+                            if let Ok(messages) = serde_json::from_str::<Vec<ChatMessage>>(&content) {
+                                if !messages.is_empty() {
+                                    
+                                    let last_message = messages.last().unwrap();
+                                    let timestamp = if let Some(ts) = last_message.timestamp.as_deref() {
+                                        if let Ok(datetime) = chrono::DateTime::parse_from_rfc3339(ts) {
+                                            
+                                            (datetime.timestamp() * 1000 + datetime.timestamp_subsec_millis() as i64) as u64
+                                            } else {
+                                                0
+                                            }
+                                        } else {
+                                            0
+                                        };
+                                    
+                                    let (name, img) = if let Ok(characters) = read_characters_file() {
+                                        if let Some(character) = characters.iter().find(|c| c.id == character_id) {
+                                            (character.name.clone(), character.img.clone())
+                                        } else {
+                                            (character_id.clone(), String::new())
+                                        }
+                                    } else {
+                                        (character_id.clone(), String::new())
+                                    };
+                                    
+                                    chats.push(RecentChat {
+                                        character_id,
+                                        persona_id,
+                                        name,
+                                        img: Some(img),
+                                        last_used: timestamp,
+                                    });
+                                }
+                            }
+                        }
                     }
                 }
             }
         }
     }
+    
     Ok(chats)
 }
 
@@ -180,4 +210,14 @@ pub fn load_chat_history(character_id: String, persona_id: String) -> Result<Vec
     } else {
         Ok(vec![]) 
     }
+}
+
+
+#[tauri::command]
+pub fn delete_chat_history(character_id: String, persona_id: String) -> Result<(), String> {
+    let filename = format!("data/history/{}_{}.json", character_id, persona_id);
+    if std::path::Path::new(&filename).exists() {
+        std::fs::remove_file(&filename).map_err(|e| e.to_string())?;
+    }
+    Ok(())
 }

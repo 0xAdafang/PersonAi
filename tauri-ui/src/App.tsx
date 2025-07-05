@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Sidebar from "./components/Sidebar";
 import Header from "./components/Header";
 import Dashboard from "./pages/Dashboard";
+import ChatHistoryPage from "./pages/ChatHistoryPage";
 import CreateCharacter from "./pages/CreateCharacter";
 import YourCharacters from "./pages/YourCharacters";
 import EditCharacter from "./pages/EditCharacter";
@@ -10,6 +11,8 @@ import YourPersonas from "./pages/YourPersonas";
 import EditPersona from "./pages/EditPersona";
 import ChatSetup from "./pages/ChatSetup";
 import ChatPage from "./pages/ChatPage";
+
+
 
 
 
@@ -30,7 +33,7 @@ function App() {
             <Route path="/edit-persona/:id" element={<EditPersona />} />
             <Route path="/chat" element={<ChatSetup />} />
             <Route path="/chat/:characterId/:personaId" element={<ChatPage />} />
-           
+            <Route path="/chat-history" element={<ChatHistoryPage />} />
           </Routes>
         </div>
       </div>

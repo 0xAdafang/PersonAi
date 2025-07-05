@@ -98,7 +98,7 @@ def format_memory_context(memory):
         return "This is the beginning of your interaction."
     
     formatted_memory = "Previous conversation highlights:\n"
-    for i, msg in enumerate(memory[-5:]):  # Last 5 messages for context
+    for i, msg in enumerate(memory[-5:]):  
         if msg.get('type') == 'user':
             formatted_memory += f"• User said: \"{msg.get('content', '')}\"\n"
         elif msg.get('type') == 'ai':
@@ -177,15 +177,15 @@ def generate():
     print(json.dumps(data, indent=2))
     
     if not data:
-        print("❌ Aucune donnée reçue")
-        return jsonify({"response": "Aucune donnée reçue", "status": "error"})
+        print("❌ No data received")
+        return jsonify({"response": "No data received", "status": "error"})
     
     if data.get("type") == "character":
         formatted_prompt = format_prompt_for_character(data)
     else:
         formatted_prompt = data.get("prompt", "")
     
-    print(f"🎯 Prompt formaté (longueur: {len(formatted_prompt)} caractères)")
+    print(f"🎯 Formatted Prompt (length: {len(formatted_prompt)} characters))")
     
     try:
         ollama_payload = {
@@ -208,15 +208,15 @@ def generate():
         
         if response.status_code == 200:
             result = response.json()
-            ai_response = result.get("response", "[Erreur réponse Ollama]")
+            ai_response = result.get("response", "[Error Ollama response]")
             
-            print(f"✅ Réponse Ollama reçue (longueur: {len(ai_response)} caractères)")
+            print(f"✅ Ollama response received (length: {len(ai_response)} characters))")
             
             cleaned_response = clean_response(ai_response)
             
-            print(f"🧹 Réponse nettoyée (longueur: {len(cleaned_response)} caractères)")
+            print(f"🧹 Cleaned response (length: {len(cleaned_response)} characters)")
             
-            # CORRECTION: Vérifier que les IDs sont valides avant de sauvegarder
+           
             character_id = data.get("character_id")
             persona_id = data.get("persona_id")
             
@@ -231,11 +231,11 @@ def generate():
                         character_name=data.get("character_name", "Unknown"),
                         character_img=data.get("character_img", "")
                     )
-                    print("✅ Sauvegarde terminée")
+                    print("✅ Save done")
                 except Exception as save_error:
-                    print(f"❌ Erreur sauvegarde (non bloquante): {save_error}")
+                    print(f"❌ Backup error (non-blocking): {save_error}")
             else:
-                print(f"⚠️ Sauvegarde ignorée - IDs invalides: char={character_id}, persona={persona_id}")
+                print(f"⚠️ Backup skipped - invalid IDs : char={character_id}, persona={persona_id}")
             
             return jsonify({
                 "response": cleaned_response,
@@ -244,22 +244,22 @@ def generate():
                 "status": "success"
             })
         else:
-            print(f"❌ Erreur Ollama HTTP {response.status_code}: {response.text}")
+            print(f"❌ Error Ollama HTTP {response.status_code}: {response.text}")
             return jsonify({
-                "response": f"[Erreur Ollama HTTP {response.status_code}] - {response.text}",
+                "response": f"[Error Ollama HTTP {response.status_code}] - {response.text}",
                 "status": "error"
             })
             
     except requests.exceptions.Timeout:
         print("⏰ Timeout Ollama")
         return jsonify({
-            "response": "[Timeout - Le modèle met trop de temps à répondre]",
+            "response": "[Timeout - The model takes too long to respond]",
             "status": "timeout"
         })
     except Exception as e:
         print(f"❌ Exception: {e}")
         return jsonify({
-            "response": f"[Erreur appel Ollama : {e}]",
+            "response": f"[Error Ollama calling : {e}]",
             "status": "error"
         })
 
@@ -281,22 +281,26 @@ def clean_response(response):
     return cleaned.strip()
 
 def save_to_history(character_id, persona_id, user_message, ai_message, character_name="Unknown", character_img=""):
-    # CORRECTION: Créer un nom de fichier valide et sauvegarder les métadonnées
+   
     base_dir = os.path.join(os.path.dirname(__file__), "..", "data", "history")
     os.makedirs(base_dir, exist_ok=True)
     
     filename = os.path.join(base_dir, f"{character_id}_{persona_id}.json")
     
-    entry = {
-        "user": user_message,
-        "ai": ai_message,
-        "timestamp": datetime.now().isoformat(),
-        "character_id": character_id,
-        "persona_id": persona_id,
-        "character_name": character_name,
-        "character_img": character_img
+    now = datetime.now().isoformat()
+
+    entry_user = {
+        "role": "user",
+        "content": user_message,
+        "timestamp": now
     }
-    
+
+    entry_ai = {
+        "role": "assistant",
+        "content": ai_message,
+        "timestamp": now
+    }
+
     try:
         if os.path.exists(filename):
             with open(filename, "r", encoding="utf-8") as f:
@@ -304,7 +308,7 @@ def save_to_history(character_id, persona_id, user_message, ai_message, characte
         else:
             history = []
         
-        history.append(entry)
+        history.extend([entry_user, entry_ai])
         
         if len(history) > 100:
             history = history[-100:]
@@ -312,20 +316,20 @@ def save_to_history(character_id, persona_id, user_message, ai_message, characte
         with open(filename, "w", encoding="utf-8") as f:
             json.dump(history, f, indent=2, ensure_ascii=False)
         
-        print(f"💾 Historique sauvegardé dans {filename}")
+        
         
     except Exception as e: 
-        print(f"❌ Erreur lors de la sauvegarde de l'historique: {e}")
+        print(f"❌ Error with saving history: {e}")
         pass
     
-    # CORRECTION: Créer un index global des chats récents
+    
     try:
         update_recent_chats_index(character_id, persona_id, character_name, character_img)
     except Exception as e:
-        print(f"❌ Erreur mise à jour index chats récents: {e}")
+        print(f"❌ Error updating recent chats index: {e}")
 
 def update_recent_chats_index(character_id, persona_id, character_name, character_img):
-    """Mettre à jour l'index des chats récents"""
+    
     index_file = os.path.join(os.path.dirname(__file__), "..", "data", "recent_chats.json")
     
     try:
@@ -335,7 +339,6 @@ def update_recent_chats_index(character_id, persona_id, character_name, characte
         else:
             recent_chats = []
         
-        # Rechercher si cette combinaison existe déjà
         existing_chat = None
         for i, chat in enumerate(recent_chats):
             if chat.get("characterId") == character_id and chat.get("personaId") == persona_id:
@@ -351,13 +354,12 @@ def update_recent_chats_index(character_id, persona_id, character_name, characte
         }
                 
         if existing_chat is not None:
-            # Mettre à jour l'entrée existante
+           
             recent_chats[existing_chat] = chat_entry
         else:
-            # Ajouter nouvelle entrée
+           
             recent_chats.append(chat_entry)
         
-        # Trier par lastUsed (plus récent en premier) et limiter à 10
         recent_chats.sort(key=lambda x: x.get("lastUsed", 0), reverse=True)
         recent_chats = recent_chats[:10]
         
@@ -407,7 +409,7 @@ def get_history():
 
 @app.route("/recent-chats", methods=["GET"])
 def get_recent_chats():
-    """Nouveau endpoint pour récupérer les chats récents"""
+    
     index_file = os.path.join(os.path.dirname(__file__), "..", "data", "recent_chats.json")
     
     try:
@@ -420,11 +422,11 @@ def get_recent_chats():
         return jsonify(recent_chats)
     
     except Exception as e:
-        print(f"❌ Erreur lecture chats récents: {e}")
+        print(f"❌ Error reading recent chats: {e}")
         return jsonify([])
 
 if __name__ == "__main__":
-    print("🤖 PersonAI LLM Service démarré")
-    print(f"📍 Modèle utilisé: {MODEL_NAME}")
+    print("🤖 PersonAI LLM Service Started")
+    print(f"📍 Model used: {MODEL_NAME}")
     print("🔗 Ollama URL:", OLLAMA_URL)
     app.run(host="0.0.0.0", port=5050, debug=True)

@@ -63,7 +63,7 @@ pub struct AskRequestForChat {
     pub memory: Vec<ChatMessage>,
 }
 
-#[derive(Serialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct RecentChat {
     pub character_id: String,
     pub persona_id: String,
@@ -71,4 +71,3 @@ pub struct RecentChat {
     pub img: Option<String>,
     pub last_used: u64,
 }
-

@@ -25,7 +25,7 @@ const YourCharacters = () => {
         setCharacters(res);
       })
       .catch((err) => {
-        console.error("Erreur chargement:", err);
+        console.error("Error laoding:", err);
       });
   };
 
@@ -42,7 +42,7 @@ const YourCharacters = () => {
       alert(`🗑️ "${name}" deleted successfully.`);
       loadCharacters(); 
     } catch (err) {
-      console.error("Erreur suppression:", err);
+      console.error("Error deleting:", err);
       alert("❌ Failed to delete character.");
     }
   };

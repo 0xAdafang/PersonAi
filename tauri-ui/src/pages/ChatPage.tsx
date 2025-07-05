@@ -75,8 +75,8 @@ const ChatPage = () => {
           }
         }
       } catch (err) {
-        console.error("Erreur d'initialisation:", err);
-        setError("Impossible d'initialiser le chat. Vérifiez que tous les services sont démarrés.");
+        console.error("Error initialization:", err);
+        setError("Unable to initialize chat. Check that all services are started..");
       }
     };
 
@@ -96,7 +96,7 @@ const ChatPage = () => {
       await invoke("start_services");
       setServicesStarted(true);
     } catch (err) {
-      console.error("Erreur services:", err);
+      console.error("Error services:", err);
       throw err;
     }
   };
@@ -136,7 +136,7 @@ const ChatPage = () => {
       };
       setMessages((prev) => [...prev, botMessage]);
     } catch (err) {
-      console.error("Erreur LLM:", err);
+      console.error("Error LLM:", err);
       const errorMessage: Message = {
         role: "assistant",
         content: "❌ Désolé, je ne peux pas répondre en ce moment.",
@@ -166,8 +166,8 @@ const ChatPage = () => {
         setMessages([]);
       }
     } catch (err) {
-      console.error("Erreur reset:", err);
-      setError("Impossible de réinitialiser la conversation");
+      console.error("Error reset:", err);
+      setError("Unable to reset conversation");
     }
   };
 

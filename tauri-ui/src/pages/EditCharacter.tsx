@@ -165,9 +165,6 @@ const EditCharacter = () => {
               ← Back to Characters
             </button>
             <h1 className="text-xl font-medium">Edit Character</h1>
-            <button className="text-purple-300 hover:text-white transition-colors">
-              📖 View Character Book
-            </button>
           </div>
 
           

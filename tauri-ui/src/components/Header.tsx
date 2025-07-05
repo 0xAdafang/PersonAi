@@ -9,20 +9,6 @@ const Header = () => {
   return (
     <header className="h-20 flex items-center justify-between px-6 bg-zinc-950 text-white border-b border-zinc-800">
       <div className="text-lg font-medium">Let's make a new story..</div>
-
-      <nav className="flex items-center gap-6">
-        <IconButton icon={<RefreshCw size={20} />} tooltip="Reset chat" />
-        <IconButton icon={<Download size={20} />} tooltip="Export data" />
-        <IconButton icon={<Settings size={20} />} tooltip="Settings" />
-
-        <button className="w-9 h-9 rounded-full overflow-hidden ring-2 ring-catppuccin-mauve hover:ring-4 transition">
-          <img
-            src="/assets/avatar.jpg"
-            alt="Profile"
-            className="w-full h-full object-cover"
-          />
-        </button>
-      </nav>
     </header>
   );
 };
