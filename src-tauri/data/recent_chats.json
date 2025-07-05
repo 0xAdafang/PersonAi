@@ -1,5 +1,12 @@
 [
   {
+    "characterId": "alice",
+    "personaId": "kairu_1751569693377",
+    "name": "Alice",
+    "img": "/assets/characters/alice.png",
+    "lastUsed": 1751752357
+  },
+  {
     "characterId": "melia",
     "personaId": "kairu_1751569693377",
     "name": "Melia",
