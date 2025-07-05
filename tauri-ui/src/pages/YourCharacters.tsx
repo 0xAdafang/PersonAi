@@ -70,9 +70,9 @@ const YourCharacters = () => {
             </div>
 
             <div className="flex justify-between mt-3 text-sm">
-              <button
+             <button
                 className="text-catppuccin-mauve hover:underline"
-                onClick={() => navigate(`/chat/${char.id}`)}
+                onClick={() => navigate(`/chat?characterId=${char.id}`)}
               >
                 → Start Chat
               </button>
@@ -189,7 +189,7 @@ const YourCharacters = () => {
 
               <div className="flex gap-3 mt-6">
                 <button
-                  onClick={() => navigate(`/chat/${viewingCharacter.id}`)}
+                  onClick={() => navigate(`/chat?characterId=${viewingCharacter.id}`)}
                   className="flex-1 bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-lg transition-colors"
                 >
                   Start Chat
