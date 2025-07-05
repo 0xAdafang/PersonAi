@@ -40,7 +40,7 @@ const YourCharacters = () => {
     try {
       await invoke("delete_character", { id });
       alert(`🗑️ "${name}" deleted successfully.`);
-      loadCharacters(); // reload list
+      loadCharacters(); 
     } catch (err) {
       console.error("Erreur suppression:", err);
       alert("❌ Failed to delete character.");

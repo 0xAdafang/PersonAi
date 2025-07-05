@@ -40,6 +40,8 @@ fn main() {
             load_character_by_id,
             load_persona_by_id,
             check_services_status,
+            load_recent_chats,
+            load_chat_history,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

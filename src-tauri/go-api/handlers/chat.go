@@ -114,26 +114,28 @@ func buildPrompt(input models.AskRequest) (string, error) {
 func callPythonLLM(prompt string, character models.Character, persona *models.Persona, memory []models.ChatMessage, model string) (string, error) {
 	
 	if model == "" {
-		model = "vicuna"
+		model = "dolphin-mistral"
 	}
 	
 	fmt.Printf("🔍 Modèle demandé: '%s'\n", model)
 
 	payload := map[string]interface{}{
-		"type":                   "character",
-		"model":                  model,
-		"character_name":         character.Name,
-		"character_description":  character.Description,
-		"character_personality":  character.Tagline,
-		"character_background":   character.Definition,
-		"user_message":           prompt,
-		"memory":                 memory,
+    "type":                   "character",
+    "model":                  model,
+    "character_id":           character.ID,
+    "character_name":         character.Name,
+    "character_description":  character.Description,
+    "character_personality":  character.Tagline,
+    "character_background":   character.Definition,
+    "user_message":           prompt,
+    "memory":                 memory,
 	}
-
 	if persona != nil {
+		payload["persona_id"] = persona.ID
 		payload["user_persona_name"] = persona.DisplayName
 		payload["user_persona_background"] = persona.Background
 	}
+
 
 	jsonData, err := json.Marshal(payload)
 	if err != nil {

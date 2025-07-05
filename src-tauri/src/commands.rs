@@ -2,7 +2,7 @@ use crate::file_utils::{self, copy_image_file, delete_character_from_file, read_
 use crate::services::{
     self, check_service_health, make_http_request, make_simple_post_request, start_go_service, start_python_service, SERVICE_STARTUP_DELAY
 };
-use crate::types::{AppState, AskRequest, AskRequestForChat, AskResponse, Character, ChatMessage, Persona, ResetRequest};
+use crate::types::{AppState, AskRequest, AskRequestForChat, AskResponse, Character, ChatMessage, Persona, RecentChat, ResetRequest};
 use std::sync::atomic::Ordering;
 use std::thread;
 use std::time::Duration;
@@ -102,7 +102,7 @@ pub async fn chat_with_character(input: String,character_id: String,persona_id: 
         question: input,
         character_id,
         user_id: persona_id,
-        model: "vicuna".to_string(),
+        model: "dolphin-mistral".to_string(),
         memory: history,
     };
 
@@ -135,4 +135,49 @@ pub fn load_persona_by_id(id: String) -> Result<Persona, String> {
 #[tauri::command]
 pub async fn check_services_status() -> Result<String, String> {
     services::check_all_services_health().await
+}
+
+#[tauri::command]
+pub fn load_recent_chats() -> Result<Vec<RecentChat>, String> {
+    let path = std::path::Path::new("data/history");
+    let mut chats = vec![];
+
+    if let Ok(entries) = std::fs::read_dir(path) {
+        for entry in entries.flatten(){
+            let path = entry.path();
+            if path.extension().map(|e| e == "json").unwrap_or(false) {
+                if let Ok(content) = std::fs::read_to_string(&path) {
+                    if let Ok(chat) = serde_json::from_str::<serde_json::Value>(&content) {
+                        let character_id = chat.get("chatacterId").and_then(|v| v.as_str()).unwrap_or("unknown").to_string();
+                        let persona_id = chat.get("personaId").and_then(|v| v.as_str()).unwrap_or("unknown").to_string();
+                        let name = chat.get("characterName").and_then(|v| v.as_str()).unwrap_or("Unknown").to_string();
+                        let img = chat.get("characterImg").and_then(|v| v.as_str()).map(|s| s.to_string());
+                        let timestamp = chat.get("lastUsed").and_then(|v| v.as_u64()).unwrap_or(0);
+
+                        chats.push(RecentChat {
+                            character_id,
+                            persona_id,
+                            name,
+                            img,
+                            last_used: timestamp,
+                        });
+                    }
+                }
+            }
+        }
+    }
+    Ok(chats)
+}
+
+
+#[tauri::command]
+pub fn load_chat_history(character_id: String, persona_id: String) -> Result<Vec<ChatMessage>, String> {
+    let filename = format!("data/history/{}_{}.json", character_id, persona_id);
+    if std::path::Path::new(&filename).exists() {
+        let content = std::fs::read_to_string(&filename).map_err(|e| e.to_string())?;
+        let messages: Vec<ChatMessage> = serde_json::from_str(&content).map_err(|e| e.to_string())?;
+        Ok(messages)
+    } else {
+        Ok(vec![]) 
+    }
 }

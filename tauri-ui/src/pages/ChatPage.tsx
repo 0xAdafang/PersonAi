@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import ReactMarkdown from "react-markdown";
 import { invoke } from "@tauri-apps/api/core";
 
 interface Message {
@@ -52,14 +53,24 @@ const ChatPage = () => {
           setPersona(loadedPersona);
 
           console.log("CharacterID:", characterId);
-            console.log("PersonaID:", personaId);
+          console.log("PersonaID:", personaId);
+
+            const previousMessages = await invoke<Message[]>("load_chat_history", {
+            characterId,
+            personaId
+          });
 
 
-          if (loadedCharacter) {
+          if (previousMessages && previousMessages.length > 0) {
+            setMessages(previousMessages.map(msg => ({
+            ...msg,
+            timestamp: msg.timestamp ? new Date(msg.timestamp) : undefined
+          })));
+          } else if (loadedCharacter) {
             setMessages([{
-            role: "assistant",
-            content: loadedCharacter.greeting || `Salut ! Je suis ${loadedCharacter.name}.`,
-            timestamp: new Date()
+              role: "assistant",
+              content: loadedCharacter.greeting || `Salut ! Je suis ${loadedCharacter.name}.`,
+              timestamp: new Date()
             }]);
           }
         }
@@ -75,6 +86,8 @@ const ChatPage = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  
 
   const startServicesIfNeeded = async () => {
     if (servicesStarted) return;
@@ -194,7 +207,9 @@ const ChatPage = () => {
           {messages.map((msg, idx) => (
             <div key={idx} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
               <div className={`max-w-2xl px-4 py-3 rounded-xl ${msg.role === "user" ? "bg-purple-700/30 text-right" : "bg-zinc-700/60"}`}>
-                <p className="whitespace-pre-wrap">{msg.content}</p>
+                <div className="whitespace-pre-wrap">
+                  <ReactMarkdown>{msg.content}</ReactMarkdown>
+                </div>
                 {msg.timestamp && (
                   <div className="text-xs opacity-50 mt-1">{formatTimestamp(msg.timestamp)}</div>
                 )}

@@ -49,8 +49,9 @@ pub struct AppState {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ChatMessage {
-    pub role: String,
+    pub role: String,        
     pub content: String,
+    pub timestamp: Option<String>, 
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -61,3 +62,13 @@ pub struct AskRequestForChat {
     pub model: String,
     pub memory: Vec<ChatMessage>,
 }
+
+#[derive(Serialize)]
+pub struct RecentChat {
+    pub character_id: String,
+    pub persona_id: String,
+    pub name: String,
+    pub img: Option<String>,
+    pub last_used: u64,
+}
+
