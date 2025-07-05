@@ -14,6 +14,10 @@ Role-based message structuring (user / assistant) with accurate timestamps.
 
 Automatic history reload when clicking a recent chat.
 
+### 🌞 Dashboard
+![Dashboard Light](./images/1.JPG)
+
+
 🧭 Tech Stack
 Front‑end:
 
@@ -56,6 +60,9 @@ Requires Rust + NodeJS installed locally.
 The app runs fully offline and is cross-platform.
 ```
 
+### 🧙 Manage Characters – Character & Persona Management
+![Manage Characters](./images/2.JPG)
+
 🛠️ Future Ideas & Enhancements
 Relative date formatting (e.g. “2 hours ago”)
 
@@ -77,6 +84,9 @@ Designed for custom storytelling, RPGs, and character roleplay
 Fully open-source, local-first, and extensible
 
 A perfect boilerplate to connect any AI model and UI layer
+
+### 💬 Chat Interface – Talk with your custom AI
+![Chat Page](./images/3.JPG)
 
 🫶 Contributing
 Fork the repo
