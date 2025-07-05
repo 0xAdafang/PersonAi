@@ -1,53 +1,80 @@
 🎭 PersonAi
-A local desktop assistant to create, embody, and chat with fully customized AI characters.
+A local AI assistant to embody, chat with, and remember your characters.
 
 🚀 Key Features
-Character & persona creation via an interactive UI.
+🧑‍🎨 Character & Persona Creation
+Create fully customized characters with names, roles, and backstories.
 
-Immersive chat system with persistent local history (stored in JSON).
+💬 Immersive AI Chat System
+Converse with your characters in a sleek interface. Messages are stored locally for persistent memory.
 
-Recent chat memory displayed in the sidebar and in a full-page view.
+🧠 Context-Preserving Memory
+Chat history is saved per character/persona combo in JSON files, reloaded automatically when resuming.
 
-Modern UI powered by React, TailwindCSS, and Tauri for fast native performance.
+📚 Recent Chat Overview
+Sidebar shows recent sessions with avatars and names. A full-page chat history view is also available.
 
-Role-based message structuring (user / assistant) with accurate timestamps.
+💡 Role-based Messaging
+Messages include metadata like sender role (user / assistant) and timestamp, for cleaner parsing.
 
-Automatic history reload when clicking a recent chat.
-
-### 🌞 Dashboard
-![Dashboard Light](./images/1.JPG)
-
+⚡ Modern Offline App
+Built with React, TailwindCSS, and Tauri — fast startup, native performance, and runs entirely offline.
 
 🧭 Tech Stack
-Front‑end:
-
-TypeScript (React + Vite)
+🎨 Frontend
+React + Vite (TypeScript)
 
 React Router for navigation
 
-Tailwind CSS for styling
+TailwindCSS for responsive styling
 
-Tauri API via @tauri-apps/api/tauri (invoke())
+Tauri API calls with @tauri-apps/api
 
-Back‑end:
+🧭 Tech Stack
+🎨 Frontend
+React + Vite (TypeScript)
 
-Rust via Tauri (local command bridge)
+React Router for navigation
 
-Chat history saved in data/history/{characterId}_{personaId}.json
+TailwindCSS for responsive styling
 
-Recent chats indexed in recent_chats.json
+Tauri API calls with @tauri-apps/api
 
-Commands include:
+🧠 Backend
+Rust via Tauri commands – for local OS integration and bridging
 
-load_recent_chats: list recent sessions
+Go API layer – acts as an orchestrator between frontend and LLM
 
-load_chat_history: load specific chat messages
+Python (Flask) – handles interaction with local LLMs (e.g., Ollama)
 
-delete_chat_history: delete a session
+💾 Storage
+JSON-based flat files (no database needed)
 
-⚙️ Setup & Launch
+data/history/{characterId}_{personaId}.json – per-session logs
 
+recent_chats.json – indexed summary of sessions
+
+🧩 Tauri Commands
+load_recent_chats – fetch recent sessions
+
+load_chat_history – open saved conversations
+
+delete_chat_history – remove session history
+
+🖼️ Screenshots
+
+### 🌞 Light Theme – Dashboard
+![Dashboard Light](./images/1.JPG)
+
+### 🧙 Manage Characters – Character & Persona Management
+![Manage Characters](./images/2.JPG)
+
+### 💬 Chat Interface – Talk with your custom AI
+![Chat Page](./images/3.JPG)
+
+📦 Install & Launch
 ```bash
+
 git clone https://github.com/0xAdafang/PersonAi.git
 cd PersonAi
 
@@ -56,53 +83,51 @@ npm install
 
 # Launch in dev mode
 npm run tauri dev
-Requires Rust + NodeJS installed locally.
-The app runs fully offline and is cross-platform.
+☑️ Requires Rust + Node.js installed locally.
+🔒 Runs fully offline — your chats stay on your machine. you maybe need to have Ollama on your computer
+
 ```
+✨ Why PersonAi?
+Offline and privacy-friendly — no external calls or APIs required.
 
-### 🧙 Manage Characters – Character & Persona Management
-![Manage Characters](./images/2.JPG)
+Designed for storytelling, self-RPG, character simulation, or roleplay.
 
-🛠️ Future Ideas & Enhancements
-Relative date formatting (e.g. “2 hours ago”)
+Extensible foundation to plug in your own LLM, logic, or theme.
 
-Character presets with lore and dynamic emotions
+A clean boilerplate to learn Tauri, React, and cross-platform development.
 
-Audio mode with speech synthesis and recognition (via Tauri plugin)
+🔮 Planned Features
+📆 Human-friendly timestamps (e.g., "2h ago")
 
-Integration with local LLMs like llama.cpp or Ollama
+🎭 Character presets with emotion and memory sliders
 
-Theme customization (dark/light, neon retro, etc.)
+🔊 Voice chat with speech recognition/synthesis (via Tauri plugin)
 
-Prompt Wizard - button are here in the sidebar but the option and logic missing for now
+🦙 LLM integration (Ollama, llama.cpp, etc.)
 
-✅ Why PersonAi is Useful
-Offline, privacy-friendly personal assistant framework
+🎨 Theme selector (light/dark + retro options)
 
-Designed for custom storytelling, RPGs, and character roleplay
-
-Fully open-source, local-first, and extensible
-
-A perfect boilerplate to connect any AI model and UI layer
-
-### 💬 Chat Interface – Talk with your custom AI
-![Chat Page](./images/3.JPG)
+🧙 Prompt Wizard (visible UI element in sidebar, logic WIP)
 
 🫶 Contributing
-Fork the repo
+Fork the repository
 
 Create a feature branch
 
-Submit a pull request with clear description
+Submit a pull request with a clear description
 
-Suggestions & improvements are welcome!
+Star the repo if you like it ⭐
+
+All contributions, issues, and suggestions are welcome.
 
 📜 License
 This project is open-source under the MIT License.
-Feel free to use, modify, and build upon it.
+Use it, modify it, break it, rebuild it. It's yours.
 
-📬 Contact
-Created by 0xAdafang (Terence) – Montréal, QC
-📧 Email: adafang@proton.me
-🌐 GitHub: github.com/0xAdafang
+📬 Author
+Built with ❤️ by 0xAdafang (Terence)
+📍 Montréal, QC
+📧 adafang@proton.me
+🌐 github.com/0xAdafang
+
 
