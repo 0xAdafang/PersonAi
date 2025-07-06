@@ -230,15 +230,15 @@ def generate():
                     matching = next((c for c in characters if c["id"] == character_id), None)
                     if matching:
                         data["character_img"] = matching.get("img", "")
-                        print(f"🔄 Image récupérée via fallback : {data['character_img']}")
+                       
                     else:
-                        print("⚠️ Aucun personnage correspondant trouvé pour récupérer l'image.")
+                        print("")
                 except Exception as e:
-                    print(f"⚠️ Erreur lors du fallback d’image: {e}")
+                    print(f"{e}")
 
             if character_id and persona_id and character_id != "unknown" and persona_id != "unknown":
                 try:
-                    print("💾 Début sauvegarde historique...")
+                    
                     save_to_history(
                         character_id=character_id,
                         persona_id=persona_id,
@@ -247,7 +247,7 @@ def generate():
                         character_name=data.get("character_name", "Unknown"),
                         character_img=data.get("character_img", "")
                     )
-                    print("✅ Save done")
+                    
                 except Exception as save_error:
                     print(f"❌ Backup error (non-blocking): {save_error}")
             else:
@@ -363,8 +363,7 @@ def update_recent_chats_index(character_id, persona_id, character_name, characte
                 existing_chat = i
                 break
 
-        print(f"🧩 [DEBUG] character_img reçu : {character_img}")
-
+       
         
         if character_img and character_img.strip():
             if character_img.startswith("/assets/"):
@@ -378,7 +377,6 @@ def update_recent_chats_index(character_id, persona_id, character_name, characte
             if os.path.exists(absolute_path):
                 final_img = candidate
             else:
-                print(f"⚠️ Image non trouvée sur le disque : {absolute_path}, fallback sur default.png")
                 final_img = "/assets/characters/default.png"
         else:
             final_img = "/assets/characters/default.png"
@@ -403,7 +401,7 @@ def update_recent_chats_index(character_id, persona_id, character_name, characte
         with open(index_file, "w", encoding="utf-8") as f:
             json.dump(recent_chats, f, indent=2, ensure_ascii=False)
 
-        print(f"✅ Index chats récents mis à jour avec image: {final_img}")
+        
 
     except Exception as e:
         print(f"❌ Erreur mise à jour index chats récents: {e}")
