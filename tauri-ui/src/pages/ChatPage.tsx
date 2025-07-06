@@ -189,7 +189,7 @@ const ChatPage = () => {
         <div className="px-6 py-4 border-b border-zinc-800 bg-zinc-900 flex justify-between">
           <div className="flex items-center gap-4">
             <button onClick={() => navigate("/")} className="text-gray-400 hover:text-white">← Retour</button>
-            <h1 className="text-xl font-semibold">Discussion avec {character?.name || "Personnage"}</h1>
+            <h1 className="text-xl font-semibold">Roleplay with {character?.name || "Personnage"}</h1>
           </div>
           <div className="flex items-center gap-2">
             <button onClick={resetConversation} className="bg-red-600 hover:bg-red-700 px-3 py-1 text-sm rounded text-white">🔄 Reset</button>
@@ -222,7 +222,7 @@ const ChatPage = () => {
               <div className="bg-zinc-700/60 px-4 py-3 rounded-xl">
                 <div className="flex items-center gap-2">
                   <div className="animate-spin w-4 h-4 border-2 border-purple-600 border-t-transparent rounded-full"></div>
-                  <span className="text-sm opacity-70">{character?.name} tape...</span>
+                  <span className="text-sm opacity-70">{character?.name} writing...</span>
                 </div>
               </div>
             </div>
@@ -237,7 +237,7 @@ const ChatPage = () => {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Écrivez votre message..."
+              placeholder="Write your message..."
               rows={1}
               className="flex-1 p-3 rounded-lg bg-zinc-800 resize-none focus:outline-none focus:ring-2 focus:ring-purple-600"
               disabled={loading}
@@ -247,11 +247,11 @@ const ChatPage = () => {
               disabled={loading || !input.trim()}
               className="bg-purple-600 hover:bg-purple-700 px-5 py-2 rounded-lg text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              {loading ? "⏳" : "Envoyer"}
+              {loading ? "⏳" : "Send"}
             </button>
           </form>
           <div className="text-xs text-gray-400 mt-1">
-            Entrée = envoyer, Shift+Entrée = retour ligne
+            Enter = send, Shift+Enter = line back
           </div>
         </div>
       </div>

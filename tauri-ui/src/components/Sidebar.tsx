@@ -85,9 +85,9 @@ const Sidebar = () => {
     const now = new Date();
     const diffHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
     
-    if (diffHours < 1) return "À l'instant";
-    if (diffHours < 24) return `Il y a ${diffHours}h`;
-    if (diffHours < 48) return "Hier";
+    if (diffHours < 1) return "Now";
+    if (diffHours < 24) return `There is ${diffHours}h`;
+    if (diffHours < 48) return "Yesterday";
     return date.toLocaleDateString();
   };
 
