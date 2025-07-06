@@ -173,21 +173,22 @@ Primary Focus: {scene_config['focus']}
 @app.route("/generate", methods=["POST"])
 def generate():
     data = request.get_json()
-    
+
     print("📨 Reçu du backend Go :")
     print(json.dumps(data, indent=2))
-    
+
     if not data:
         print("❌ No data received")
         return jsonify({"response": "No data received", "status": "error"})
-    
+
+   
     if data.get("type") == "character":
         formatted_prompt = format_prompt_for_character(data)
     else:
         formatted_prompt = data.get("prompt", "")
-    
-    print(f"🎯 Formatted Prompt (length: {len(formatted_prompt)} characters))")
-    
+
+    print(f"🎯 Formatted Prompt (length: {len(formatted_prompt)} characters)")
+
     try:
         ollama_payload = {
             "model": MODEL_NAME,
@@ -202,25 +203,39 @@ def generate():
                 "num_predict": 100
             }
         }
-        
-        print(f"🚀 Envoi à Ollama...")
-        
+
+        print(f"🚀 Sending to Ollama...")
+
         response = requests.post(OLLAMA_URL, json=ollama_payload, timeout=45)
-        
+
         if response.status_code == 200:
             result = response.json()
             ai_response = result.get("response", "[Error Ollama response]")
-            
-            print(f"✅ Ollama response received (length: {len(ai_response)} characters))")
-            
+
+            print(f"✅ Ollama response received (length: {len(ai_response)} characters)")
+
             cleaned_response = clean_response(ai_response)
-            
+
             print(f"🧹 Cleaned response (length: {len(cleaned_response)} characters)")
-            
-           
+
             character_id = data.get("character_id")
             persona_id = data.get("persona_id")
-            
+
+           
+            if not data.get("character_img") and character_id:
+                try:
+                    characters_file = os.path.join(os.path.dirname(__file__), "..", "data", "characters.json")
+                    with open(characters_file, "r", encoding="utf-8") as f:
+                        characters = json.load(f)
+                    matching = next((c for c in characters if c["id"] == character_id), None)
+                    if matching:
+                        data["character_img"] = matching.get("img", "")
+                        print(f"🔄 Image récupérée via fallback : {data['character_img']}")
+                    else:
+                        print("⚠️ Aucun personnage correspondant trouvé pour récupérer l'image.")
+                except Exception as e:
+                    print(f"⚠️ Erreur lors du fallback d’image: {e}")
+
             if character_id and persona_id and character_id != "unknown" and persona_id != "unknown":
                 try:
                     print("💾 Début sauvegarde historique...")
@@ -237,7 +252,7 @@ def generate():
                     print(f"❌ Backup error (non-blocking): {save_error}")
             else:
                 print(f"⚠️ Backup skipped - invalid IDs : char={character_id}, persona={persona_id}")
-            
+
             return jsonify({
                 "response": cleaned_response,
                 "model_used": MODEL_NAME,
@@ -250,7 +265,7 @@ def generate():
                 "response": f"[Error Ollama HTTP {response.status_code}] - {response.text}",
                 "status": "error"
             })
-            
+
     except requests.exceptions.Timeout:
         print("⏰ Timeout Ollama")
         return jsonify({
@@ -263,6 +278,7 @@ def generate():
             "response": f"[Error Ollama calling : {e}]",
             "status": "error"
         })
+
 
 def clean_response(response):
     lines_to_remove = [
@@ -330,47 +346,68 @@ def save_to_history(character_id, persona_id, user_message, ai_message, characte
         print(f"❌ Error updating recent chats index: {e}")
 
 def update_recent_chats_index(character_id, persona_id, character_name, character_img):
-    
     index_file = os.path.join(os.path.dirname(__file__), "..", "data", "recent_chats.json")
     
     try:
+        
         if os.path.exists(index_file):
             with open(index_file, "r", encoding="utf-8") as f:
                 recent_chats = json.load(f)
         else:
             recent_chats = []
+
         
         existing_chat = None
         for i, chat in enumerate(recent_chats):
             if chat.get("characterId") == character_id and chat.get("personaId") == persona_id:
                 existing_chat = i
                 break
+
+        print(f"🧩 [DEBUG] character_img reçu : {character_img}")
+
         
+        if character_img and character_img.strip():
+            if character_img.startswith("/assets/"):
+                candidate = character_img
+            else:
+                candidate = f"/assets/characters/{character_img}"
+
+           
+            frontend_public_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "tauri-ui", "public"))
+            absolute_path = os.path.join(frontend_public_dir, candidate.lstrip("/"))
+            if os.path.exists(absolute_path):
+                final_img = candidate
+            else:
+                print(f"⚠️ Image non trouvée sur le disque : {absolute_path}, fallback sur default.png")
+                final_img = "/assets/characters/default.png"
+        else:
+            final_img = "/assets/characters/default.png"
+
         chat_entry = {
             "characterId": character_id,
             "personaId": persona_id,
             "name": character_name,
-            "img": character_img or f"/assets/characters/{character_id}.png",
+            "img": final_img,
             "lastUsed": int(datetime.now().timestamp())
         }
-                
+
         if existing_chat is not None:
-           
             recent_chats[existing_chat] = chat_entry
         else:
-           
             recent_chats.append(chat_entry)
-        
+
+       
         recent_chats.sort(key=lambda x: x.get("lastUsed", 0), reverse=True)
         recent_chats = recent_chats[:10]
-        
+
         with open(index_file, "w", encoding="utf-8") as f:
             json.dump(recent_chats, f, indent=2, ensure_ascii=False)
-        
-        print(f"✅ Index chats récents mis à jour")
-        
+
+        print(f"✅ Index chats récents mis à jour avec image: {final_img}")
+
     except Exception as e:
         print(f"❌ Erreur mise à jour index chats récents: {e}")
+
 
 @app.route("/models", methods=["GET"])
 def list_models():
