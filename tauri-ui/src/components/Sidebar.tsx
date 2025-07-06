@@ -91,6 +91,18 @@ const Sidebar = () => {
     return date.toLocaleDateString();
   };
 
+  const getImageSrc = (imgPath: string | undefined): string => {
+    if (!imgPath || imgPath.trim() === "") {
+      return "/assets/characters/default.png";
+    }
+  
+    if (imgPath.startsWith("/assets/")) {
+      return imgPath;
+    }
+  
+    return `/assets/characters/${imgPath}`;
+  };
+
   return (
     <aside className="w-64 h-screen bg-zinc-900 text-white p-4 flex flex-col gap-4">
       <button
@@ -121,7 +133,7 @@ const Sidebar = () => {
         </Section>
       </nav>
 
-      {/* CORRECTION: Section des chats récents améliorée */}
+     
       {recentChats.length > 0 && (
         <div className="mt-6">
           <h2 className="text-xs uppercase tracking-wide text-gray-400 mb-2">
@@ -136,10 +148,11 @@ const Sidebar = () => {
                 title={`Dernier message: ${formatLastUsed(chat.lastUsed)}`}
               >
                 <img
-                  src={chat.img || "/assets/characters/default.png"}
+                  src={getImageSrc(chat.img)}
                   alt={chat.name}
                   className="w-8 h-8 rounded object-cover border border-zinc-700"
                   onError={(e) => {
+                    console.log(`Erreur chargement image: ${e.currentTarget.src}`);
                     e.currentTarget.src = "/assets/characters/default.png";
                   }}
                 />
@@ -155,7 +168,6 @@ const Sidebar = () => {
         </div>
       )}
 
-      {/* CORRECTION: Section des personnages actifs améliorée */}
       {characters.length > 0 && (
         <div className="mt-6">
           <h2 className="text-xs uppercase tracking-wide text-gray-400 mb-2">
