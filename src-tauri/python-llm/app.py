@@ -73,6 +73,7 @@ User's message: "{prompt_data.get('user_message', '')}"
 7. **RESPONSE STRUCTURE:**
    - Begin with scene-setting or character action
    - Integrate dialogue naturally within narrative
+   - Enclose descriptions and actions in *italics* (e.g., *He crossed his arms, eyes narrowing.*)
    - Include physical reactions and body language
    - End with continuation hooks or emotional beats
 
@@ -84,7 +85,7 @@ User's message: "{prompt_data.get('user_message', '')}"
 *[Additional scene description or reaction]*
 
 **RESPONSE GUIDELINES:**
-- Length: 150-300 words for immersive experience
+- Length: Max 3–4 lines (around 40–60 words)
 - Tone: Match character's personality and current emotional state
 - Focus: Balance action, dialogue, and description
 - Engagement: Create opportunities for meaningful interaction
