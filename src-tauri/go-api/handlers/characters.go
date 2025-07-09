@@ -13,19 +13,19 @@ import (
 
 func SaveCharacterHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.Error(w, "Méthode non autorisée", http.StatusMethodNotAllowed)
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
 	var newChar models.Character
 	if err := json.NewDecoder(r.Body).Decode(&newChar); err != nil {
-		http.Error(w, "Requête invalide", http.StatusBadRequest)
+		http.Error(w, "Invalid request", http.StatusBadRequest)
 		return
 	}
 
 	characters, err := utils.LoadCharacters()
 	if err != nil {
-		http.Error(w, "Erreur chargement JSON", http.StatusInternalServerError)
+		http.Error(w, "JSON loading error", http.StatusInternalServerError)
 		return
 	}
 
@@ -42,7 +42,7 @@ func SaveCharacterHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := utils.SaveCharacters(characters); err != nil {
-		http.Error(w, "Erreur écriture JSON", http.StatusInternalServerError)
+		http.Error(w, "JSON writing error", http.StatusInternalServerError)
 		return
 	}
 
@@ -52,7 +52,7 @@ func SaveCharacterHandler(w http.ResponseWriter, r *http.Request) {
 
 func DeleteCharacterHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.Error(w, "Méthode non autorisée", http.StatusMethodNotAllowed)
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
@@ -60,13 +60,13 @@ func DeleteCharacterHandler(w http.ResponseWriter, r *http.Request) {
 		ID string `json:"id"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
-		http.Error(w, "Requête invalide", http.StatusBadRequest)
+		http.Error(w, "Invalid query", http.StatusBadRequest)
 		return
 	}
 
 	characters, err := utils.LoadCharacters()
 	if err != nil {
-		http.Error(w, "Erreur chargement JSON", http.StatusInternalServerError)
+		http.Error(w, "JSON loading error", http.StatusInternalServerError)
 		return
 	}
 
@@ -81,12 +81,12 @@ func DeleteCharacterHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(filtered) == len(characters) {
-		http.Error(w, "Personnage introuvable", http.StatusNotFound)
+		http.Error(w, "Character not found", http.StatusNotFound)
 		return
 	}
 
 	if err := utils.SaveCharacters(filtered); err != nil {
-		http.Error(w, "Erreur écriture JSON", http.StatusInternalServerError)
+		http.Error(w, "JSON writing error", http.StatusInternalServerError)
 		return
 	}
 
