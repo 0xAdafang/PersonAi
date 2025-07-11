@@ -23,7 +23,7 @@ func AskHandler(w http.ResponseWriter, r *http.Request) {
 
 	var req models.AskRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "Requête invalide", http.StatusBadRequest)
+		http.Error(w, "Invalid request", http.StatusBadRequest)
 		fmt.Printf("🟢 AskHandler - Requête reçue:\n- CharacterID: %s\n- PersonaID: %s\n- Question: %s\n",
 		req.CharacterID, req.UserID, req.Question)
 		return
