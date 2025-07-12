@@ -17,7 +17,7 @@ var conversationHistory = make(map[string][]string)
 
 func AskHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.Error(w, "Méthode non autorisée", http.StatusMethodNotAllowed)
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
