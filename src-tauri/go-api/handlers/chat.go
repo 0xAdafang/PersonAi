@@ -50,7 +50,7 @@ func ResetHandler(w http.ResponseWriter, r *http.Request) {
 		CharacterID string `json:"character_id"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
-		http.Error(w, "Requête invalide", http.StatusBadRequest)
+		http.Error(w, "Invalid request", http.StatusBadRequest)
 		return
 	}
 
