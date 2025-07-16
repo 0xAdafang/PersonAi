@@ -79,7 +79,7 @@ func buildPrompt(input models.AskRequest) (string, error) {
 		}
 	}
 	if char == nil {
-		return "", fmt.Errorf("personnage introuvable")
+		return "", fmt.Errorf("Character not found")
 	}
 
 	
