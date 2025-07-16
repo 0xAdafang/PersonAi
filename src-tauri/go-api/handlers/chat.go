@@ -31,7 +31,7 @@ func AskHandler(w http.ResponseWriter, r *http.Request) {
 
 	answer, err := buildPrompt(req)
 	if err != nil {
-		http.Error(w, "Erreur service : "+err.Error(), http.StatusInternalServerError)
+		http.Error(w, "Service Error : "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
