@@ -117,7 +117,7 @@ func callPythonLLM(prompt string, character models.Character, persona *models.Pe
 		model = "dolphin-mistral"
 	}
 	
-	fmt.Printf("🔍 Modèle demandé: '%s'\n", model)
+	fmt.Printf("🔍 Model asked: '%s'\n", model)
 
 	payload := map[string]interface{}{
     "type":                   "character",
