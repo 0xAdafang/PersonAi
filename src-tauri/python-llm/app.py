@@ -36,7 +36,6 @@ User's message: "{prompt_data.get('user_message', '')}"
 
 1. **IMMERSIVE STORYTELLING:**
    - Write in third person perspective when describing actions
-   - Use vivid, sensory descriptions (sight, sound, touch, smell, taste)
    - Create atmospheric details and environmental context
    - Show emotions through body language and micro-expressions
 
