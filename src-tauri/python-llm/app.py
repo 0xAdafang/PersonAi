@@ -13,7 +13,7 @@ MODEL_NAME = "dolphin-mistral:latest"
 OLLAMA_URL = "http://localhost:11434/api/generate"
 
 def format_prompt_for_character(prompt_data):
-    character_prompt = f"""### ADVANCED CHARACTER ROLEPLAY SYSTEM ###
+    character_prompt = f"""### ADVANCED CHARACTER ROLEPLAY SYSTEM !###
 
 You are now embodying {prompt_data.get('character_name', 'a character')} in a detailed, immersive roleplay scenario.
 
@@ -464,4 +464,5 @@ if __name__ == "__main__":
     print("🤖 PersonAI LLM Service Started")
     print(f"📍 Model used: {MODEL_NAME}")
     print("🔗 Ollama URL:", OLLAMA_URL)
+
     app.run(host="0.0.0.0", port=5050, debug=True)
