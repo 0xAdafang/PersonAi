@@ -2,7 +2,7 @@
 
 **A local AI assistant to embody, chat with, and remember your characters.**
 
-PersonAi is a modern, high-performance desktop application built with Tauri, TypeScript, Rust, and React. It's designed to provide an immersive character interaction experience with persistent memory and complete offline functionality.
+PersonAi is a modern, high-performance desktop application built with Tauri, TypeScript, Rust, and React. It's designed to provide an immersive character interaction experience with persistent memory and complete offline functionality !
 
 ⚠️ **Please note:** The application runs entirely offline for maximum privacy and security.  
 ⚠️ **This project contains only demonstration data.** No real personal information is stored or processed.
